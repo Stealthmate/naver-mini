@@ -13,9 +13,10 @@ const WHITESPACE = /[ \n\t]+/g;
 
 
 function parseDefinitionHeader(header, $) {
-    var headerobj = {};
-    headerobj.word = header.find("strong").text();
-    headerobj.hanja = header.find(".fnt15").children().remove().end().text().trim();
+    let headerobj = {};
+    let name = header.find(".fnt15").children("sup").remove().end().text();
+    headerobj.word = name.replace(/\(.*\)/, "").trim();
+    headerobj.hanja = name.substring(name.indexOf('(')+1, name.indexOf(')')).trim();
     headerobj.pronun = header.find(".pronun").text();
     return headerobj;
 }
@@ -25,13 +26,15 @@ function parseDefinitions(sec, $) {
 
     let definitions = sec.children("li");
 
-    console.log(sec);
     for (let i = 0; i <= definitions.length - 1; i++) {
 
         let def = $(definitions[i]);
 
         var header = parseDefinitionHeader($(def.find("div")), $);
-        var wordclass = $(def.find("p")).text().replace(WHITESPACE, " ");
+        var wordclassstr = $(def.find("p").not(".syn")).text().replace(WHITESPACE, " ");
+        let wordclass = wordclassstr.match(/^\[[^\[\]]+\]/g) || "";
+        if(wordclass != "") wordclass = wordclass.join();
+        console.log(wordclass);
 
         var glosses = $(def.find("li span"));
         if(glosses.length < 1) glosses = $(def.find("p"))
