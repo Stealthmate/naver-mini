@@ -39,7 +39,7 @@ function parseDefinitions(sec, $) {
 
         var glossesobj = [];
         for (let i = 0; i <= glosses.length - 1; i++) {
-            glossesobj[i] = $(glosses[i]).text();
+            glossesobj[i] = $(glosses[i]).text().replace(WHITESPACE, " ");
         }
         deflist[i] = {
             head: header,
