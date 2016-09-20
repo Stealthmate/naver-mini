@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 
 app.get("/kr", require("./kr.js").route);
 
-const PORT = 80;
+const PORT = process.env.PORT || 80;
 const HOST_LOCAL = "localhost";
 
 app.listen(PORT, HOST_LOCAL, () => {
