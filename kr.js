@@ -21,7 +21,7 @@ function parseDefinitionHeader(header, $) {
 }
 
 function parseDefinitions(sec, $) {
-    let deflist = {};
+    let deflist = [];
 
     let definitions = sec.children("li");
 
@@ -34,7 +34,7 @@ function parseDefinitions(sec, $) {
         var wordclass = $(def.find("p")).text().replace(WHITESPACE, " ");
 
         var glosses = $(def.find("li span"));
-        var glossesobj = {};
+        var glossesobj = [];
         for (let i = 0; i <= glosses.length - 1; i++) {
             glossesobj[i] = $(glosses[i]).text();
         }
@@ -49,7 +49,7 @@ function parseDefinitions(sec, $) {
 }
 
 function parseIdioms(sec, $) {
-    let idiomlist = {};
+    let idiomlist = [];
 
     let idioms = sec.children("li");
 
