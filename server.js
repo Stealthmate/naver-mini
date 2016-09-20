@@ -17,6 +17,6 @@ app.get("/kr", require("./kr.js").route);
 const PORT = process.env.PORT || 80;
 const HOST_LOCAL = "localhost";
 
-app.listen(PORT, HOST_LOCAL, () => {
+app.listen(PORT, () => {
     console.log("Up and running!");
 });
