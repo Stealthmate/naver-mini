@@ -1,0 +1,20 @@
+{
+  "name": "naver-mini",
+  "version": "1.0.0",
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "body-parser": "^1.15.2",
+    "commander": "^2.9.0",
+    "cryptiles": "^3.1.1",
+    "jquery": "^3.1.0",
+    "jsdom": "^9.5.0",
+    "striptags": "^2.1.1"
+  },
+  "engines": {
+    "node": "6.2.1"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "main.js"
+}
