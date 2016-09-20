@@ -34,6 +34,9 @@ function parseDefinitions(sec, $) {
         var wordclass = $(def.find("p")).text().replace(WHITESPACE, " ");
 
         var glosses = $(def.find("li span"));
+        if(glosses.length < 1) glosses = $(def.find("p"))
+
+
         var glossesobj = [];
         for (let i = 0; i <= glosses.length - 1; i++) {
             glossesobj[i] = $(glosses[i]).text();
