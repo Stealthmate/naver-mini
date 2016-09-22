@@ -1,6 +1,6 @@
 const jsdom = require("jsdom").jsdom;
 
-const URL_TEMPLATE = "/search.nhn?query=";
+const URL_TEMPLATE = "/search.nhn?kind=keyword&query=";
 
 const REQUEST_OPTIONS = {
     host: "krdic.naver.com",
@@ -33,16 +33,15 @@ function parseDefinitions(sec, $) {
         var header = parseDefinitionHeader($(def.find("div")), $);
         var wordclassstr = $(def.find("p").not(".syn")).text().replace(WHITESPACE, " ");
         let wordclass = wordclassstr.match(/^\[[^\[\]]+\]/g) || "";
+        console.log(wordclass)
         if(wordclass != "") wordclass = wordclass.join();
-        console.log(wordclass);
-
         var glosses = $(def.find("li span"));
         if(glosses.length < 1) glosses = $(def.find("p"))
 
 
         var glossesobj = [];
         for (let i = 0; i <= glosses.length - 1; i++) {
-            glossesobj[i] = $(glosses[i]).text().replace(WHITESPACE, " ");
+            glossesobj[i] = $(glosses[i]).text().replace(WHITESPACE, " ").replace(wordclass, "");
         }
         deflist[i] = {
             head: header,
@@ -124,4 +123,4 @@ function serve(req, res) {
         });
 }
 
-module.exports.route = serve;
+module.exports.route = require('./words.js').route;
