@@ -34,12 +34,16 @@ function parseDetails(html, resolve) {
 
     if (glosses.length == 0) {
         glosses = $("#meanArea > .pclass");
-        examplelists = $("#meanArea > ul.lst_mean");
 
         let glossobj = {
-            def: $(glosses).text().trim().replace(WHITESPACE, " "),
-            ex: $(examplelists).children("li").text().trim().replace(WHITESPACE, " ")
+            def:glosses.text().trim().replace(WHITESPACE, " "),
+            ex: []
         };
+
+        let exlist = $("#meanArea > ul.lst_mean > li");
+        for (let j = 0; j <= exlist.length - 1; j++) {
+            glossobj.ex[j] = $(exlist[j]).text().trim().replace(WHITESPACE, " ");
+        }
 
         glossesobjs.push(glossobj)
     }
