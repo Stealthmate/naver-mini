@@ -35,7 +35,7 @@ function parseMoreInfo(link) {
 
 function parseGlossRuby(def, $) {
 
-    let str = def.text();
+    let str = def.find("rp").remove().end().text();
     console.log(str);
     let rbkanji = def.find("rb");
     let rbfuri = def.find("rt");
@@ -43,11 +43,9 @@ function parseGlossRuby(def, $) {
     for(let i = 0; i <= rbkanji.length - 1; i++) {
         let kanji = $(rbkanji[i]).text();
         let furigana = $(rbfuri[i]).text();
-        console.log(kanji + " " + furigana);
-        str = str.replace("(" + furigana + ")", "").replace(kanji, "(" + kanji +  ";" + furigana + ")");
-        console.log(str);
+        str = str.replace(kanji + furigana, "(" + kanji +  ";" + furigana + ")");
     }
-
+    console.log(str);
     return str;
 }
 
