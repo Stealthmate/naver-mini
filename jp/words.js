@@ -43,7 +43,7 @@ function parseGlossRuby(def, $) {
     for(let i = 0; i <= rbkanji.length - 1; i++) {
         let kanji = $(rbkanji[i]).text();
         let furigana = $(rbfuri[i]).text();
-        str = str.replace(kanji + furigana, "(" + kanji +  ";" + furigana + ")");
+        if(kanji.length > 0 && furigana.length > 0) str = str.replace(kanji + furigana, "(" + kanji +  ";" + furigana + ")");
     }
     console.log(str);
     return str;
