@@ -15,6 +15,8 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 app.get("/kr", require("./kr").words);
 app.get("/kr/details", require("./kr").details);
 
+app.get("/jp", require("./jp").words);
+
 const PORT = process.env.PORT || 80;
 const HOST_LOCAL = "localhost";
 
