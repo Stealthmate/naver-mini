@@ -16,6 +16,8 @@ const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
 const jsdom = require("jsdom").jsdom;
 
+const MARK_OPENKR = "openkr";
+
 function parseDefinitionHeader(header, $) {
     let headerobj = {};
     let name = header.find(".fnt15").children("sup").remove().end().text();
@@ -26,13 +28,12 @@ function parseDefinitionHeader(header, $) {
 }
 
 function parseMoreInfo(link) {
-    //link = "http://cc.naver.com/cc?a=wrd.entry&r=1&i=18831401&bw=1131&px=145&py=355&sx=145&sy=355&m=1&ssc=dic.kr.keyword&q=%EB%BB%94%ED%95%98%EB%8B%A4&s=&p=&g=&u=http%3A%2F%2Fkrdic.naver.com%2Fdetail.nhn%3Fdocid%3D18831401";
     let str = link;
     if (link.indexOf("cc.naver.com") > -1) {
         str = str.substring(str.indexOf("&u=")).substring(3);
         str = decodeURIComponent(str);
     }
-    str = str.substring(1);
+    str = str.substring(str.indexOf("/openkr"));
     return str;
 }
 
@@ -72,15 +73,21 @@ function parseDefinitions(sec, $) {
             more = parseMoreInfo($(def.find(".fnt15")).attr("href"));
         }
 
-        deflist[i] = {
-            word: header.word,
-            gloss: gloss
-        };
+        let defobj = {
+                word: header.word,
+                gloss: gloss
+        }
 
-        if (header.hanja) deflist[i].hanja = header.hanja;
-        if (header.pronun) deflist[i].pronun = header.pronun;
-        if (wordclass.length > 0) deflist[i].class = wordclass;
-        if (more) deflist[i].more = more;
+        let isOpenKR = false;
+
+        if (header.hanja) defobj.hanja = header.hanja;
+        if (header.pronun) defobj.pronun = header.pronun;
+        if (wordclass.length > 0) defobj.class = wordclass;
+        if (more) defobj.more = more;
+        if ($(def.find(".fnt15")).attr("href").indexOf(MARK_OPENKR) >= 0) isOpenKR = true;
+        if(isOpenKR) defobj.openkr = "";
+
+        if(!isOpenKR) deflist.push(defobj);
     }
 
     return deflist;
