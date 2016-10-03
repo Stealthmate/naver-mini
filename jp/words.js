@@ -14,8 +14,6 @@ const WHITESPACE = /[ \n\t]+/g;
 
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
-const jsdom = require("jsdom").jsdom;
-
 const MARK_ONYOMI = "음독";
 const MARK_KUNYOMI = "훈독";
 const MARK_STROKES = "총획";
@@ -172,8 +170,7 @@ function parseDefinitions(items, $) {
 }
 
 function parseResult(html, resolve) {
-    let wnd = jsdom(html).defaultView;
-    let $ = require('jquery')(wnd);
+    let $ = require('cheerio').load(html);
 
     let sections = $(".section, .section4");
 

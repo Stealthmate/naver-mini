@@ -14,8 +14,6 @@ const WHITESPACE = /[ \n\t]+/g;
 
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
-const jsdom = require("jsdom").jsdom;
-
 const MARK_OPENKR = "openkr";
 
 function parseDefinitionHeader(header, $) {
@@ -93,8 +91,7 @@ function parseDefinitions(sec, $) {
 }
 
 function parseResult(html, resolve) {
-    let wnd = jsdom(html).defaultView;
-    let $ = require('jquery')(wnd);
+    let $ = require('cheerio').load(html);
 
     let sections = $(".section, .section4");
 

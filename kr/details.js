@@ -2,18 +2,19 @@ const REQUEST_OPTIONS = {
     host: "krdic.naver.com",
     port: 80,
     path: "/",
-    method: 'GET'
+    method: 'GET',
+    agent: false
 };
 
 const WHITESPACE = /[ \n\t]+/g;
 
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
-const jsdom = require("jsdom").jsdom;
-
 function parseDetails(html, resolve) {
-    let wnd = jsdom(html).defaultView;
-    let $ = require('jquery')(wnd);
+    //let jsdom = require("jsdom").jsdom;
+    //let wnd = jsdom(html).defaultView;
+    //let $ = require('jquery')(wnd);
+    let $ = require('cheerio').load(html);
 
     let glosses = $("dl.lst > dt");
     let examplelists = $("dl.lst > dd");
@@ -48,6 +49,7 @@ function parseDetails(html, resolve) {
         glossesobjs.push(glossobj)
     }
 
+    $ = null;
     resolve(glossesobjs);
 
 }
@@ -61,17 +63,20 @@ function lookUp(link) {
 
         let req = http.request(REQUEST_OPTIONS, function(res) {
             res.setEncoding('utf8');
-            var html = "";
+            let html = "";
             res.on('data', function(chunk) {
                     html = html + chunk;
                 })
                 .on('end', () => {
                     parseDetails(html, resolve);
+                    html = null;
+                    resolve = null;
                 });
         });
         req.end();
     })
 }
+const heapdump = require('heapdump');
 
 function serve(req, res) {
 
@@ -94,7 +99,7 @@ function serve(req, res) {
                 let reslen = result.length;
                 let start = (psize * page);
                 let end = start + psize;
-                if(end < reslen) {
+                if (end < reslen) {
                     response = result.slice(start, end);
                 } else {
                     response = result.slice(start, result.length);

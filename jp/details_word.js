@@ -31,8 +31,6 @@ const WHITESPACE = /[ \n\t]+/g;
 
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
-const jsdom = require("jsdom").jsdom;
-
 function parseRuby(el, $) {
 
     let str = el.find("rp").remove().end().text();
@@ -71,8 +69,7 @@ function parseExamples(container, $) {
 }
 
 function parseDetails(html, resolve) {
-    let wnd = jsdom(html).defaultView;
-    let $ = require('jquery')(wnd);
+    let $ = require('cheerio').load(html);
 
     let classSections = $(".section_article");
 
