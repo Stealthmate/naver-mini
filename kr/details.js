@@ -11,9 +11,6 @@ const WHITESPACE = /[ \n\t]+/g;
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
 function parseDetails(html, resolve) {
-    //let jsdom = require("jsdom").jsdom;
-    //let wnd = jsdom(html).defaultView;
-    //let $ = require('jquery')(wnd);
     let $ = require('cheerio').load(html);
 
     let glosses = $("dl.lst > dt");
@@ -49,7 +46,6 @@ function parseDetails(html, resolve) {
         glossesobjs.push(glossobj)
     }
 
-    $ = null;
     resolve(glossesobjs);
 
 }
@@ -69,8 +65,6 @@ function lookUp(link) {
                 })
                 .on('end', () => {
                     parseDetails(html, resolve);
-                    html = null;
-                    resolve = null;
                 });
         });
         req.end();

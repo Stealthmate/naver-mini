@@ -10,8 +10,7 @@ const WHITESPACE = /[ \n\t]+/g;
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
 function parseDetails(html, resolve) {
-    let wnd = jsdom(html).defaultView;
-    let $ = require('jquery')(wnd);
+    let $ = require('cheerio').load(html);
 
     let glosses = $("dl.lst > dt");
     let examplelists = $("dl.lst > dd");
