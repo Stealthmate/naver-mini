@@ -85,7 +85,6 @@ function parseDefinitions(sec, $) {
         if (wordclass.length > 0) defobj.class = wordclass;
         if (more) defobj.more = more;
         if ($(def.find(".fnt15")).attr("href").indexOf(MARK_OPENKR) >= 0) isOpenKR = true;
-        if(isOpenKR) defobj.openkr = "";
 
         if(!isOpenKR) deflist.push(defobj);
     }
