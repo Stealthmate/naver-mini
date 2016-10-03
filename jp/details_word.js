@@ -47,6 +47,29 @@ function parseRuby(el, $) {
     return str;
 }
 
+function parseExamples(container, $) {
+    let exampleContainers = $(container).children("p");
+
+    let examples = [];
+
+    for (let l = 0; l <= exampleContainers.length - 1; l++) {
+        let exampleContainer = $(exampleContainers[l]).children("span").remove(".player, .ico_bl");
+        let original = parseRuby($(exampleContainer[1]), $);
+        let translation = parseRuby($(exampleContainer[2]), $);
+        //console.log(" - - - - " + original);
+        //console.log(" - - - - " + translation);
+
+        let exampleObj = {
+            ex: original,
+            tr: translation
+        };
+
+        examples.push(exampleObj);
+    }
+
+    return examples;
+}
+
 function parseDetails(html, resolve) {
     let wnd = jsdom(html).defaultView;
     let $ = require('jquery')(wnd);
@@ -59,10 +82,10 @@ function parseDetails(html, resolve) {
         let wordclass = $(classSections[i]).find("h5").text().trim();
         //console.log(" - " + wordclass);
         let meanings = [];
-        let meaningContainers = $(classSections[i]).find(".mean_level_2 > li");
+        let meaningContainers = $(classSections[i]).find(".mean_level_2 > li, .mean_level_1 > li");
         for (let j = 0; j <= meaningContainers.length - 1; j++) {
 
-            let meaning = $(meaningContainers[j]).children(".lst_txt").text().trim();
+            let meaning = parseRuby($(meaningContainers[j]).children(".lst_txt"), $);
             //console.log(" - - " + meaning);
 
             let glosses = [];
@@ -72,34 +95,21 @@ function parseDetails(html, resolve) {
                 let gloss = $(glossContainers[k]).children(".lst_txt").text().trim();
                 //console.log(" - - - " + gloss);
 
-                let examples = [];
-                let exampleContainers = $(glossContainers[k]).children("p");
-
-                for (let l = 0; l <= exampleContainers.length - 1; l++) {
-                    let exampleContainer = $(exampleContainers[l]).children("span");
-                    let original = parseRuby($(exampleContainer[1]), $);
-                    let translation = parseRuby($(exampleContainer[3]), $);
-                    //console.log(" - - - - " + original);
-                    //console.log(" - - - - " + translation);
-
-                    let exampleObj = {
-                        ex: original,
-                        tr: translation
-                    };
-
-                    examples.push(exampleObj);
-                }
+                let examples = parseExamples(glossContainers[k], $);
                 let glossObj = {
-                    gloss: gloss,
+                    g: gloss,
                     ex: examples
                 };
                 glosses.push(glossObj);
             }
 
+            let examples = parseExamples(meaningContainers[j], $);
+
             let meaningObj = {
-                mean: meaning,
-                glosses: glosses
+                m: meaning
             };
+            if(glosses.length > 0) meaningObj.gloss = glosses;
+            if(examples && examples.length > 0) meaningObj.ex = examples;
             meanings.push(meaningObj);
         }
 
