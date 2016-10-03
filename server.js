@@ -3,9 +3,6 @@ const app = EXPRESS();
 
 const compression = require('compression');
 
-const jsdom = require("jsdom");
-const $ = require('jquery')(jsdom.jsdom().defaultView);
-
 let bodyParser = require('body-parser');
 
 app.use(bodyParser.json()); // to support JSON-encoded bodies

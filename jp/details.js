@@ -9,8 +9,6 @@ const WHITESPACE = /[ \n\t]+/g;
 
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
-const jsdom = require("jsdom").jsdom;
-
 function parseDetails(html, resolve) {
     let wnd = jsdom(html).defaultView;
     let $ = require('jquery')(wnd);
