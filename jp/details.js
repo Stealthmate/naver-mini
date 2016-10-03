@@ -83,8 +83,8 @@ function serve(req, res) {
 
     let serve = undefined;
 
-    let serveKanji = require('/details_kanji.js');
-    let serveWord  = require('/details_word.js');
+    let serveKanji = require('./details_kanji.js');
+    let serveWord  = require('./details_word.js');
 
     if ('page' in req.query) page = parseInt(req.query.page) - 1;
     if ('pagesize' in req.query) pagesize = parseInt(req.query.pagesize);

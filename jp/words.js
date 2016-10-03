@@ -41,11 +41,11 @@ function parseMoreInfo(link) {
     return str;
 }
 
-function parseGlossRuby(def, $) {
+function parseRuby(el, $) {
 
-    let str = def.find("rp").remove().end().text();
-    let rbkanji = def.find("rb");
-    let rbfuri = def.find("rt");
+    let str = el.find("rp").remove().end().text();
+    let rbkanji = el.find("rb");
+    let rbfuri = el.find("rt");
 
     for (let i = 0; i <= rbkanji.length - 1; i++) {
         let kanji = $(rbkanji[i]).text();
@@ -91,7 +91,7 @@ function parseDefinition(def, $) {
     }
 
     let replaceWordClassInDefinition = new RegExp("\\[(" + wordClasses.join("|") + ")\\]", "g");
-    gloss = parseGlossRuby(gloss, $).replace(replaceWordClassInDefinition, "").replace(/\[\]/g, "").replace(WHITESPACE, " ").trim();
+    gloss = parseRuby(gloss, $).replace(replaceWordClassInDefinition, "").replace(/\[\]/g, "").replace(WHITESPACE, " ").trim();
 
     if (gloss.indexOf("...") > -1) {
         more = parseMoreInfo($(def.find("a.mw")).attr("href"));
