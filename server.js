@@ -19,6 +19,7 @@ app.get("/kr/ex", require("./kr").examples)
 
 app.get("/jp", require("./jp").words);
 app.get("/jp/details", require('./jp').details);
+app.get("/jp/ex", require('./jp').examples);
 
 const PORT = process.env.PORT || 80;
 const HOST_LOCAL = "localhost";
