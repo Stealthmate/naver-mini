@@ -54,7 +54,7 @@ function parseDefinitions(sec, $) {
 
         let toReplace = new RegExp("\\[(" + wordclass.join("|") + ")\\]", "g");
 
-        let glosses = $(def.find("li span"));
+        let glosses = $(def.children().find("li span.con"));
 
         let gloss = "";
         let more = undefined;
