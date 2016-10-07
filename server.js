@@ -15,6 +15,7 @@ app.use(compression());
 
 app.get("/kr", require("./kr").words);
 app.get("/kr/details", require("./kr").details);
+app.get("/kr/ex", require("./kr").examples)
 
 app.get("/jp", require("./jp").words);
 app.get("/jp/details", require('./jp').details);
