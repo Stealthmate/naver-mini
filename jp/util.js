@@ -11,4 +11,11 @@ function parseRuby(el, $) {
     return str;
 }
 
+const WHITESPACE = /[ \n\t]+/g;
+
+function deflateStr(str) {
+    return str.replace(WHITESPACE, " ");
+}
+
 module.exports.parseRuby = parseRuby;
+module.exports.deflateStr = deflateStr;
