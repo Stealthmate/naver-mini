@@ -74,10 +74,10 @@ function parseDetails(html, resolve) {
     detailsobj.ji = $(container).find(".hanja h3").text();
 
     let strokes = deflate($(container).find("dt:contains('" + MARK_STROKES + "')").next("dd").text());
-    detailsobj.strokes = parseInt(strokes.substring(0, strokes.length - 1));
+    detailsobj.str = parseInt(strokes.substring(0, strokes.length - 1));
 
     let radicalRow = deflate($(container).find("dt:contains('" + MARK_RADICAL + "')").next("dd").text());
-    detailsobj.radical = radicalRow.substring(0, 1);
+    detailsobj.rad = radicalRow.substring(0, 1);
 
     let kr_readings = radicalRow.substring(radicalRow.indexOf(')') + 1).split(" ");
     detailsobj.kr = kr_readings.slice(0, kr_readings.length - 1);
