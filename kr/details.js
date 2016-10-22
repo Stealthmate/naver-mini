@@ -13,6 +13,13 @@ const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 function parseDetails(html, resolve) {
     let $ = require('cheerio').load(html);
 
+    let hanja = $(".spot_area#wordArea h3 .hanja").text().trim().replace(WHITESPACE, " ");
+
+    let word = $(".spot_area#wordArea h3").children().remove().end().text().trim().replace(WHITESPACE, " ");
+
+    let wordclass = $("#meanArea h4").text().trim().replace(WHITESPACE, " ");
+
+
     let glosses = $("dl.lst > dt");
     let examplelists = $("dl.lst > dd");
 
@@ -46,7 +53,13 @@ function parseDetails(html, resolve) {
         glossesobjs.push(glossobj)
     }
 
-    resolve(glossesobjs);
+    let resultobj = {};
+    resultobj.word = word;
+    if(hanja) resultobj.hanja = hanja;
+    if(wordclass) resultobj.wordclass = wordclass;
+    resultobj.defs = glossesobjs;
+
+    resolve(resultobj);
 
 }
 
