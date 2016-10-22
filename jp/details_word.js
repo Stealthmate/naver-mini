@@ -73,6 +73,14 @@ function parseDetails(html, resolve) {
 
     let classSections = $(".section_article");
 
+    let word = $(".spot_area .maintitle").text();
+    let kanji = $(".spot_area .ps").text();
+    kanji = kanji.substring(1, kanji.length-1);
+    console.log(word);
+    console.log(kanji);
+
+
+
     let wordclasses = [];
 
     for (let i = 0; i <= classSections.length - 1; i++) {
@@ -117,7 +125,11 @@ function parseDetails(html, resolve) {
         wordclasses.push(wordclassObj);
     }
 
-    resolve(wordclasses);
+    let result = {};
+    result.word = word;
+    result.kanji = kanji;
+    result.meanings = wordclasses;
+    resolve(result);
 
 }
 
