@@ -34,7 +34,7 @@ function parseDefinitionHeader(header, $) {
 function parseMoreInfo(link) {
     let str = link;
 
-    if(link.contains(MOREINFO_WIKTIONARY)) {
+    if(link.indexOf(MOREINFO_WIKTIONARY) >= 0) {
         return link;
     }
 
