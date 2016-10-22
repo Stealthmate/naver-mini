@@ -22,6 +22,8 @@ const MARK_RADICAL = "부수";
 const TYPE_DEFINITION = "d";
 const TYPE_KANJI = "k";
 
+const MOREINFO_WIKTIONARY = "wiktionary";
+
 function parseDefinitionHeader(header, $) {
     let headerobj = {};
     headerobj.word = header.find("a").text().trim();
@@ -31,6 +33,11 @@ function parseDefinitionHeader(header, $) {
 
 function parseMoreInfo(link) {
     let str = link;
+
+    if(link.contains(MOREINFO_WIKTIONARY)) {
+        return link;
+    }
+
     if (link.indexOf("cc.naver.com") > -1) {
         str = str.substring(str.indexOf("&u=")).substring(3);
         str = decodeURIComponent(str);
