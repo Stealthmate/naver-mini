@@ -51,7 +51,8 @@ function parseExamples(container, $) {
     let examples = [];
 
     for (let l = 0; l <= exampleContainers.length - 1; l++) {
-        let exampleContainer = $(exampleContainers[l]).children("span").remove(".player, .ico_bl");
+        let exampleContainer = $(exampleContainers[l]).children("span").remove(".player, .ico_bl").end().children("span");
+        console.log(exampleContainer);
         let original = parseRuby($(exampleContainer[1]), $);
         let translation = parseRuby($(exampleContainer[2]), $);
         //console.log(" - - - - " + original);
