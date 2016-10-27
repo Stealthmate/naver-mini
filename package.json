@@ -10,6 +10,7 @@
     "cryptiles": "^3.1.1",
     "express": "^4.14.0",
     "heapdump": "^0.3.7",
+    "minimist": "^1.2.0",
     "striptags": "^2.1.1"
   },
   "engines": {
@@ -17,7 +18,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node --expose-gc test.js"
+    "test": "node --expose-gc test.js",
+    "benchmark": "node test.js"
   },
   "main": "main.js"
 }

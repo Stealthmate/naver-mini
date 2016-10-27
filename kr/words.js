@@ -111,7 +111,7 @@ function lookUp(query, page) {
         if (page < 1) page = 1;
 
         REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
-
+        let reqtime = Date.now();
         let req = http.request(REQUEST_OPTIONS, function(res) {
             res.setEncoding('utf8');
             var html = "";
@@ -119,6 +119,8 @@ function lookUp(query, page) {
                     html = html + chunk;
                 })
                 .on('end', () => {
+                    let restime = (Date.now() - reqtime)/1000;
+                    if(restime > 1) console.log("Response from naver " + restime);
                     parseResult(html, resolve);
                 });
         });

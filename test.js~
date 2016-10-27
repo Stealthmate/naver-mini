@@ -1,8 +1,0 @@
-let a = 0;
-let b = 99;
-for(let i=0;i<=10000;i++)
-{
-	a++;
-	b++;
-	console.log(a/b);
-}
