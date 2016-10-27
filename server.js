@@ -31,6 +31,8 @@ app.get("/jp", require("./jp").words);
 app.get("/jp/details", require('./jp').details);
 app.get("/jp/ex", require('./jp').examples);
 
+app.get("/en", require("./en").words);
+
 const PORT = process.env.PORT || ARGS.port || 80;
 
 var server = app.listen(PORT, () => {
