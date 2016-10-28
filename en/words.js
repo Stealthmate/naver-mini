@@ -1,5 +1,6 @@
 /*
 word,
+hanja,
 pronun,
 class,
 meaning
@@ -83,7 +84,7 @@ function parseDefinitions(items, $) {
         resultItem.word = word;
         if(pronun) resultItem.pronun = pronun;
         if(hanja) resultItem.hanja = hanja;
-        if(wordclasses != null) resultItem.wordclasses = wordclasses;
+        if(wordclasses != null) resultItem.class = wordclasses;
         resultItem.meaning = meaning;
 
         deflist.push(resultItem);
