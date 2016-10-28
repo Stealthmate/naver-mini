@@ -69,7 +69,8 @@ function parseDefinitions(items, $) {
         if(hanja) word = word.replace(hanja, "").trim();
 
         let defd = $(def.nextUntil("dt").children("div").children("p")[0]);
-        let meaning = defd.children("span").nextUntil("img").text().trim().replace(WHITESPACE,  " ");
+        let meaning = (defd.text() + $(defd.children("span")[0]).nextUntil("img").text()).trim().replace(WHITESPACE, " ");
+        if(meaning.length == 0) meaning = defd.text().trim().replace(WHITESPACE,  " ");
 
         let wordclasses = meaning.match(WORDCLASS);
 
