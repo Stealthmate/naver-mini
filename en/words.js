@@ -22,7 +22,7 @@ const REQUEST_OPTIONS = {
 
 const WHITESPACE = /[ \r\n\t]+/g;
 
-const WORDCLASS = /(^|\n)[\[\(][^\[\]]+[\]\)]/g;
+const WORDCLASS = /(^|\n)[\[\(][^\[\]\)\(]+[\]\)]/g;
 
 const TYPE_DEFINITION = "d";
 const TYPE_KANJI = "k";
