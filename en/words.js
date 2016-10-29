@@ -60,13 +60,16 @@ function parseDefinitions(items, $) {
 
         let def = $(defs[i]);
         def = def.children("a").remove().end();
-        let word = $(def.children("span")[0]).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
-        let pronun = $(def.children("span")[1]).text().trim().replace(WHITESPACE, " ");
+        //let word = $(def.children("span")[0]).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
+        let word = def.children().eq(0).children().eq(0).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
+        //let pronun = $(def.children("span")[1]).text().trim().replace(WHITESPACE, " ");
+        let pronun = def.children("span").eq(1).text().trim().replace(WHITESPACE, " ");
+        if(pronun.indexOf("[") < 0) pronun = "";
         pronun = pronun.replace(/[\[\]]/g, "");
         pronun = pronun.replace("|", "'");
 
-        let hanja = $(def.children("span")[0]).children().remove().end().text().trim().replace(WHITESPACE, " ");
-        if(hanja) word = word.replace(hanja, "").trim();
+        let hanja = null;
+        if(!pronun) hanja = def.children().eq(0).children().remove().end().text().trim().replace(WHITESPACE, " ");
 
         let defd = $(def.nextUntil("dt").children("div").children("p")[0]);
         let meaning = ($(defd.children("span")[0]).text() + $(defd.children("span")[0]).nextUntil("img").text()).trim().replace(WHITESPACE, " ");
