@@ -32,6 +32,7 @@ app.get("/jp/details", require('./jp').details);
 app.get("/jp/ex", require('./jp').examples);
 
 app.get("/en", require("./en").words);
+app.get("/en/details", require("./en").details);
 
 const PORT = process.env.PORT || ARGS.port || 80;
 
