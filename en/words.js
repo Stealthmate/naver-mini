@@ -62,6 +62,9 @@ function parseDefinitions(items, $) {
         def = def.children("a").remove().end();
         //let word = $(def.children("span")[0]).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
         let word = def.children().eq(0).children().eq(0).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
+
+        let more = def.children().eq(0).children().eq(0).attr("href").replace(/&query=.*/, "");
+
         //let pronun = $(def.children("span")[1]).text().trim().replace(WHITESPACE, " ");
         let pronun = def.children("span").eq(1).text().trim().replace(WHITESPACE, " ");
         if(pronun.indexOf("[") < 0) pronun = "";
@@ -84,12 +87,15 @@ function parseDefinitions(items, $) {
             }
         }
 
+
+
         let resultItem = {};
         resultItem.word = word;
         if(pronun) resultItem.pronun = pronun;
         if(hanja) resultItem.hanja = hanja;
         if(wordclasses != null) resultItem.class = wordclasses;
         resultItem.meaning = meaning;
+        resultItem.more = more;
 
         deflist.push(resultItem);
 
