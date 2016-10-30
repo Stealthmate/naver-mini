@@ -73,14 +73,14 @@ function parseDefinitions(sec, $) {
 
         let defobj = {
                 word: header.word,
-                gloss: gloss
+                def: gloss
         }
 
         let isOpenKR = false;
 
         if (header.hanja) defobj.hanja = header.hanja;
         if (header.pronun) defobj.pronun = header.pronun;
-        if (wordclass.length > 0) defobj.class = wordclass;
+        if (wordclass.length > 0) defobj.wclass = wordclass;
         if (more) defobj.more = more;
         if ($(def.find(".fnt15")).attr("href").indexOf(MARK_OPENKR) >= 0) isOpenKR = true;
 
