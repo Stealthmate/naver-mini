@@ -62,7 +62,7 @@ function parseDetailsFromKr(html, resolve) {
     let hanja = title.find(".tit span").children().remove().end().text().replace(WHITESPACE, " ").trim();
     if (hanja) resultObj.extra = hanja;
 
-    resultObj.defs = parseDefs($("#zoom_content").children().eq(1).children("dl"), $);
+    resultObj.clsgrps = parseDefs($("#zoom_content").children().eq(1).children("dl"), $);
 
     resolve(resultObj);
 }
