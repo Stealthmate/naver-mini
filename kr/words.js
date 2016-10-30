@@ -97,9 +97,7 @@ function parseResult(html, resolve) {
 
     let definitions = parseDefinitions(sections.find(".head_word").parent().parent().children(".lst3"), $);
 
-    let resultobj = {
-        defs: definitions
-    };
+    let resultobj = definitions;
 
     resolve(resultobj);
 }
