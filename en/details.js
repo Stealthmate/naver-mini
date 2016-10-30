@@ -89,7 +89,7 @@ function parseDetailsFromEn(html, resolve) {
         let wclassDefArr = {};
 
         let wordclass = content.find("h3").text();
-        wclassDefArr.class = wordclass;
+        wclassDefArr.wclass = wordclass;
 
         let dl = content.find("dl");
 
