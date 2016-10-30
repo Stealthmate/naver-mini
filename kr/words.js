@@ -80,7 +80,7 @@ function parseDefinitions(sec, $) {
 
         if (header.hanja) defobj.hanja = header.hanja;
         if (header.pronun) defobj.pronun = header.pronun;
-        if (wordclass.length > 0) defobj.wclass = wordclass;
+        if (wordclass.length > 0) defobj.wclass = wordclass.join(";");
         if (more) defobj.more = more;
         if ($(def.find(".fnt15")).attr("href").indexOf(MARK_OPENKR) >= 0) isOpenKR = true;
 
