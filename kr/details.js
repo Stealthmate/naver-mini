@@ -12,7 +12,7 @@ const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
 const MARK_PRONUN = "발음";
 
-function parseDetails(html, resolve) {
+function parseDetails(html) {
     let $ = require('cheerio').load(html);
 
     let titleArea = $(".spot_area#wordArea h3");
@@ -60,17 +60,14 @@ function parseDetails(html, resolve) {
 
     let resultobj = {};
 
-    let wordinfo = {};
+    resultobj.word = word;
+    if (hanja) resultobj.hanja = hanja;
+    if (wordclass) resultobj.wclass = wordclass;
+    if (pronun) resultobj.pronun = pronun;
 
-    wordinfo.word = word;
-    if (hanja) wordinfo.hanja = hanja;
-    if (wordclass) wordinfo.wclass = wordclass;
-    if (pronun) wordinfo.pronun = pronun;
-
-    resultobj.wordinfo = wordinfo;
     resultobj.defs = glossesobjs;
 
-    resolve(resultobj);
+    return resultobj;
 
 }
 
@@ -88,7 +85,9 @@ function lookUp(link) {
                     html = html + chunk;
                 })
                 .on('end', () => {
-                    parseDetails(html, resolve);
+                    let resultObj = parseDetails(html);
+                    resultObj.more = link;
+                    resolve(resultObj);
                 });
         });
         req.end();

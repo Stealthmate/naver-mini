@@ -71,9 +71,14 @@ function parseDefinitions(sec, $) {
             more = parseMoreInfo($(def.find(".fnt15")).attr("href"));
         }
 
+        let definitionObj = {
+            def: gloss,
+            ex: []
+        };
+
         let defobj = {
                 word: header.word,
-                def: gloss
+                defs: [definitionObj]
         }
 
         let isOpenKR = false;
@@ -82,6 +87,7 @@ function parseDefinitions(sec, $) {
         if (header.pronun) defobj.pronun = header.pronun;
         if (wordclass.length > 0) defobj.wclass = wordclass.join(";");
         if (more) defobj.more = more;
+
         if ($(def.find(".fnt15")).attr("href").indexOf(MARK_OPENKR) >= 0) isOpenKR = true;
 
         if(!isOpenKR) deflist.push(defobj);
