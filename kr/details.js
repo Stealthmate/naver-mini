@@ -17,7 +17,7 @@ function parseDetails(html, resolve) {
 
     let titleArea = $(".spot_area#wordArea h3");
 
-    let hanja = titleArea.find(".hanja").text().trim().replace(WHITESPACE, " ");
+    let hanja = titleArea.find(".cha").text().trim().replace(WHITESPACE, " ");
     let pronun = titleArea.children("em:contains('" + MARK_PRONUN + "')").text().replace(WHITESPACE, " ").trim();
     pronun = pronun.substring(pronun.indexOf(": ") + 2, pronun.length - 1);
 
