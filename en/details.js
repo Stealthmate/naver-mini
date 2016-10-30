@@ -1,25 +1,3 @@
-/*
-
-An example response looks like this:
-
-class: wordclass,
-mean: [
-    {
-        mean: meaning,
-        glosses: [
-            gloss: gloss,
-            ex: [
-                {
-                    ex: example,
-                    tr: translation,
-                }
-            ]
-        ]
-    }
-]
-
-*/
-
 const REQUEST_OPTIONS = {
     host: "endic.naver.com",
     port: 80,
@@ -27,99 +5,102 @@ const REQUEST_OPTIONS = {
     method: 'GET'
 };
 
-const WHITESPACE = /[ \n\t]+/g;
+const WHITESPACE = /[ \r\n\t]+/g;
 
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
-function parseExamples(container, $) {
-    let exampleContainers = $(container).children("p");
+function parseDefs(container, $) {
 
-    let examples = [];
 
-    for (let l = 0; l <= exampleContainers.length - 1; l++) {
-        let exampleContainer = $(exampleContainers[l]).children("span").remove(".player, .ico_bl").end().children("span");
-        let original = parseRuby($(exampleContainer[0]), $);
-        let translation = parseRuby($(exampleContainer[1]), $);
-        //console.log(" - - - - " + original);
-        //console.log(" - - - - " + translation);
+    let dts = container.children("dt");
+    let defsArr = [];
 
-        let exampleObj = {
-            ex: original,
-            tr: translation
-        };
+    for (let j = 0; j <= dts.length - 1; j++) {
 
-        examples.push(exampleObj);
+        let defobj = {};
+
+        let def = $(dts[j]).children("span").eq(0).remove().end();
+        let eng = def.find("i").eq(0).text().replace(WHITESPACE, " ").trim();
+        let mean = def.children("em").find(".fnt_intro").remove().end().find(".blind").remove().end().text().replace(WHITESPACE, " ").trim();
+
+        if (eng) defobj.eng = eng;
+        defobj.meaning = mean;
+
+        let exarr = [];
+
+        let examples = $(dts[j]).nextUntil("dt");
+        for (let k = 0; k <= examples.length - 1; k++) {
+
+            let exobj = {};
+
+            let dd = $(examples[k]);
+            let ex = dd.children("p").eq(0).text().replace(WHITESPACE, " ").trim();
+            let translated = dd.children("p").eq(1).text().replace(WHITESPACE, " ").trim();
+
+            exobj.ex = ex;
+            exobj.tr = translated;
+
+            exarr.push(exobj);
+        }
+        if (exarr.length > 0) defobj.ex = exarr;
+
+        defsArr.push(defobj);
     }
 
-    return examples;
+    return defsArr;
 }
 
-function parseDetails(html, resolve) {
+function parseDetailsFromKr(html, resolve) {
     let $ = require('cheerio').load(html);
 
-    let classSections = $(".section_article");
+    let resultObj = {};
 
-    let word = $(".spot_area .maintitle").text();
-    let kanji = $(".spot_area .ps").text();
-    kanji = kanji.substring(1, kanji.length-1);
-    console.log(word);
-    console.log(kanji);
+    let title = $("#content .word_view");
+    let word = title.find(".tit strong").text().trim().replace(WHITESPACE, " ");
+    resultObj.word = word;
 
+    let hanja = title.find(".tit span").children().remove().end().text().replace(WHITESPACE, " ").trim();
+    if (hanja) resultObj.extra = hanja;
 
+    resultObj.defs = parseDefs($("#zoom_content").children().eq(1).children("dl"), $);
 
-    let wordclasses = [];
-
-    for (let i = 0; i <= classSections.length - 1; i++) {
-        let wordclass = $(classSections[i]).find("h5").text().trim();
-        //console.log(" - " + wordclass);
-        let meanings = [];
-        let meaningContainers = $(classSections[i]).find(".mean_level_2 > li, .mean_level_1 > li");
-        for (let j = 0; j <= meaningContainers.length - 1; j++) {
-
-            let meaning = parseRuby($(meaningContainers[j]).children(".lst_txt"), $);
-            //console.log(" - - " + meaning);
-
-            let glosses = [];
-            let glossContainers = $(meaningContainers[j]).find(".mean_level_3 > li");
-
-            for (let k = 0; k <= glossContainers.length - 1; k++) {
-                let gloss = $(glossContainers[k]).children(".lst_txt").text().trim();
-                //console.log(" - - - " + gloss);
-
-                let examples = parseExamples(glossContainers[k], $);
-                let glossObj = {
-                    g: gloss,
-                    ex: examples
-                };
-                glosses.push(glossObj);
-            }
-
-            let examples = parseExamples(meaningContainers[j], $);
-
-            let meaningObj = {
-                m: meaning
-            };
-            if(glosses.length > 0) meaningObj.gloss = glosses;
-            if(examples && examples.length > 0) meaningObj.ex = examples;
-            meanings.push(meaningObj);
-        }
-
-        let wordclassObj = {
-            "class": wordclass,
-            mean: meanings
-        };
-        wordclasses.push(wordclassObj);
-    }
-
-    let result = {};
-    result.word = word;
-    result.kanji = kanji;
-    result.meanings = wordclasses;
-    resolve(result);
-
+    resolve(resultObj);
 }
 
-function serve(link, page, pagesize) {
+function parseDetailsFromEn(html, resolve) {
+    let $ = require('cheerio').load(html);
+
+    let resultObj = {};
+
+    let title = $("#content .word_view");
+    let word = title.find(".tit h3").text().trim().replace(WHITESPACE, " ");
+    resultObj.word = word;
+
+    let pronun = title.find(".pron em").children().eq(0).text().replace(WHITESPACE, " ").trim();
+    if (pronun) resultObj.extra = pronun;
+
+    resultObj.defs = [];
+
+    let wclassSections = $("#zoom_content .box_wrap1").has("dl");
+
+    for (let i = 0; i <= wclassSections.length - 1; i++) {
+        let content = $(wclassSections[i]);
+
+        let wclassDefArr = {};
+
+        let wordclass = content.find("h3").text();
+        wclassDefArr.class = wordclass;
+
+        let dl = content.find("dl");
+
+        wclassDefArr.defs = parseDefs(dl, $);
+        resultObj.defs.push(wclassDefArr);
+    }
+
+    resolve(resultObj);
+}
+
+function lookUp(link) {
     return new Promise((resolve, reject) => {
 
         let http = require('http');
@@ -128,16 +109,52 @@ function serve(link, page, pagesize) {
 
         let req = http.request(REQUEST_OPTIONS, function(res) {
             res.setEncoding('utf8');
-            var html = "";
+            let html = "";
             res.on('data', function(chunk) {
                     html = html + chunk;
                 })
                 .on('end', () => {
-                    parseDetails(html, resolve);
+                    if (link.indexOf("en") == 0) parseDetailsFromEn(html, resolve);
+                    else parseDetailsFromKr(html, resolve);
                 });
         });
         req.end();
-    });
+    })
+}
+const heapdump = require('heapdump');
+
+function serve(req, res) {
+
+    let link = decodeURIComponent(req.query.lnk);
+    let page = undefined;
+    let pagesize = undefined;
+    if ('page' in req.query) page = parseInt(req.query.page) - 1;
+    if ('pagesize' in req.query) pagesize = parseInt(req.query.pagesize);
+
+    lookUp(link)
+        .then(result => {
+
+            let response = result;
+
+            if (page >= 0) {
+
+                let psize = 5;
+                if (pagesize > 0) psize = pagesize;
+
+                let reslen = result.length;
+                let start = (psize * page);
+                let end = start + psize;
+                if (end < reslen) {
+                    response = result.slice(start, end);
+                } else {
+                    response = result.slice(start, result.length);
+                }
+            }
+            res.send(response);
+        })
+        .catch(err => {
+            res.status(400).end();
+        });
 }
 
-module.exports = serve;
+module.exports.route = serve;
