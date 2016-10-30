@@ -24,7 +24,7 @@ function parseDefs(container, $) {
         let mean = def.children("em").find(".fnt_intro").remove().end().find(".blind").remove().end().text().replace(WHITESPACE, " ").trim();
 
         if (eng) defobj.eng = eng;
-        defobj.meaning = mean;
+        defobj.def = mean;
 
         let exarr = [];
 
@@ -79,7 +79,7 @@ function parseDetailsFromEn(html, resolve) {
     let pronun = title.find(".pron em").children().eq(0).text().replace(WHITESPACE, " ").trim();
     if (pronun) resultObj.extra = pronun;
 
-    resultObj.defs = [];
+    resultObj.clsgrps = [];
 
     let wclassSections = $("#zoom_content .box_wrap1").has("dl");
 
@@ -94,7 +94,7 @@ function parseDetailsFromEn(html, resolve) {
         let dl = content.find("dl");
 
         wclassDefArr.defs = parseDefs(dl, $);
-        resultObj.defs.push(wclassDefArr);
+        resultObj.clsgrps.push(wclassDefArr);
     }
 
     resolve(resultObj);
