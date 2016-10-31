@@ -67,20 +67,17 @@ function parseDetails(html, resolve) {
     let deflate = require('./util.js').deflateStr;
     let parseRuby = require('./util.js').parseRuby;
 
-    let detailsobj = {};
-
-
     let container = $("div.detail_hj#content");
-    detailsobj.ji = $(container).find(".hanja h3").text();
+    let kanji = $(container).find(".hanja h3").text();
 
     let strokes = deflate($(container).find("dt:contains('" + MARK_STROKES + "')").next("dd").text());
-    detailsobj.str = parseInt(strokes.substring(0, strokes.length - 1));
+    strokes = parseInt(strokes.substring(0, strokes.length - 1));
 
     let radicalRow = deflate($(container).find("dt:contains('" + MARK_RADICAL + "')").next("dd").text());
-    detailsobj.rad = radicalRow.substring(0, 1);
+    let radical = radicalRow.substring(0, 1);
 
     let kr_readings = radicalRow.substring(radicalRow.indexOf(')') + 1).split(" ");
-    detailsobj.kr = kr_readings.slice(0, kr_readings.length - 1);
+    kr_readings = kr_readings.slice(0, kr_readings.length - 1);
 
     let meaningContainers = $(container).find("#meaningDiv .section ol li");
     let meanings = [];
@@ -96,32 +93,31 @@ function parseDetails(html, resolve) {
             let exstrjp = parseRuby($($(exCont).children()[0]), $);
 
             let exobj = {
-                jp: exstrjp,
-                kr: exstrkr
+                ex: exstrjp,
+                tr: exstrkr
             };
 
             ex.push(exobj);
         }
 
         let meanobj = {
-            m: mean,
-            ex: ex
+            m: mean
         };
+        if(ex.length > 0) meanobj.ex = ex;
 
         meanings.push(meanobj);
     }
-    detailsobj.mean = meanings;
 
     let kunyomi = [];
     let kunex = [];
 
     let kunyomiContainer = $(container).find("dt:contains('" + MARK_KUNYOMI + "')").next("dd");
+
     if (kunyomiContainer.length > 0) {
         kunyomi = deflate(kunyomiContainer.text()).split(DELIM_YOMI);
         for (let i = 0; i <= kunyomi.length - 1; i++) {
             kunyomi[i] = kunyomi[i].trim();
         }
-        detailsobj.kun = kunyomi;
         let kunexContainers = $(container).find("#meanReadDiv .section h6");
         if (kunexContainers.length > 0) {
             for (let i = 0; i <= kunexContainers.length - 1; i++) {
@@ -133,7 +129,6 @@ function parseDetails(html, resolve) {
                 };
                 kunex.push(kunexobj);
             }
-            detailsobj.kunex = kunex;
         }
     }
 
@@ -146,7 +141,6 @@ function parseDetails(html, resolve) {
         for (let i = 0; i <= onyomi.length - 1; i++) {
             onyomi[i] = onyomi[i].trim();
         }
-        detailsobj.on = onyomi;
         let onexContainers = $(container).find("#soundReadDiv .section h6");
         if (onexContainers.length > 0) {
             for (let i = 0; i <= onexContainers.length - 1; i++) {
@@ -164,11 +158,23 @@ function parseDetails(html, resolve) {
                 };
                 onex.push(onexobj);
             }
-            detailsobj.onex = onex;
         }
     }
 
-    resolve(detailsobj);
+
+
+    let detailsObj = {
+        kanji: kanji,
+        strokes: strokes,
+        radical: radical,
+        meanings: meanings
+    };
+    if(onyomi) detailsObj.onyomi = onyomi;
+    if(onex) detailsObj.onex = onex;
+    if(kunyomi) detailsObj.kunyomi = kunyomi;
+    if(kunex) detailsObj.kunex = kunex;
+
+    return detailsObj;
 
 }
 
@@ -186,7 +192,9 @@ function serve(link, page, pagesize) {
                     html = html + chunk;
                 })
                 .on('end', () => {
-                    parseDetails(html, resolve);
+                    let resultObj = parseDetails(html, resolve);
+                    resultObj.more = link;
+                    resolve(resultObj);
                 });
         });
         req.end();
