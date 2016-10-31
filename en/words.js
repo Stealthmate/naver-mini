@@ -97,14 +97,18 @@ function parseDefinitions(items, $) {
         resultItem.word = word;
         if (pronun) resultItem.pronun = pronun;
         if (hanja) resultItem.hanja = hanja;
-        if (wordclasses != null) resultItem.wclass = wordclasses.join(";");
-        resultItem.meanings = [{
-            m: meaning
+        resultItem.clsgrps = [{
+            meanings: [{
+                m: meaning
+            }
+            ]
+
         }];
-        if (enWord) resultItem.meanings[0].enWord = enWord;
+        if (wordclasses != null) resultItem.clsgrps[0].wclass = wordclasses.join(";");
+        if (enWord) resultItem.clsgrps[0].meanings[0].enWord = enWord;
         resultItem.more = more;
 
-        if(resultItem.meanings[0].m.length > 0 ) deflist.push(resultItem);
+        if(resultItem.clsgrps[0].meanings[0].m.length > 0 ) deflist.push(resultItem);
     }
 
     return deflist;

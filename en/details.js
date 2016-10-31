@@ -23,8 +23,8 @@ function parseDefs(container, $) {
         let eng = def.find("i").eq(0).text().replace(WHITESPACE, " ").trim();
         let mean = def.children("em").find(".fnt_intro").remove().end().find(".blind").remove().end().text().replace(WHITESPACE, " ").trim();
 
-        if (eng) defobj.eng = eng;
-        defobj.def = mean;
+        if (eng) defobj.enWord = eng;
+        defobj.m = mean;
 
         let exarr = [];
 
@@ -80,7 +80,7 @@ function parseDetailsFromEn(html, resolve) {
     resultObj.word = word;
 
     let pronun = title.find(".pron em").children().eq(0).text().replace(WHITESPACE, " ").trim();
-    if (pronun) resultObj.extra = pronun;
+    if (pronun) resultObj.pronun = pronun;
 
     resultObj.clsgrps = [];
 
@@ -96,11 +96,11 @@ function parseDetailsFromEn(html, resolve) {
 
         let dl = content.find("dl");
 
-        wclassDefArr.defs = parseDefs(dl, $);
+        wclassDefArr.meanings = parseDefs(dl, $);
         resultObj.clsgrps.push(wclassDefArr);
     }
 
-    resolve(resultObj);
+    return resultObj;
 }
 
 function lookUp(link) {
@@ -117,8 +117,12 @@ function lookUp(link) {
                     html = html + chunk;
                 })
                 .on('end', () => {
-                    if (link.indexOf("en") == 0) parseDetailsFromEn(html, resolve);
-                    else parseDetailsFromKr(html, resolve);
+                    let result = null;
+                    if (link.indexOf("en") == 0) result = parseDetailsFromEn(html, resolve);
+                    else result = parseDetailsFromKr(html, resolve);
+
+                    result.more = link;
+                    resolve(result);
                 });
         });
         req.end();
