@@ -170,10 +170,12 @@ function parseDetails(html, resolve) {
         radical: radical,
         meanings: meanings
     };
+    if(kr_readings) detailsObj.kr = kr_readings;
     if(onyomi) detailsObj.onyomi = onyomi;
     if(onex) detailsObj.onex = onex;
     if(kunyomi) detailsObj.kunyomi = kunyomi;
     if(kunex) detailsObj.kunex = kunex;
+
 
     return detailsObj;
 
