@@ -148,7 +148,6 @@ function parseKanji(container, $) {
     let more = parseMoreInfo($(container).find(".type_hj a").attr("href"));
 
     let kanji = {
-        type: TYPE_KANJI,
         ji: ji,
         str: strokes,
         rad: radical,
@@ -159,8 +158,10 @@ function parseKanji(container, $) {
     if (onyomi.length > 0) kanji.on = onyomi;
     if (kunyomi.length > 0) kanji.kun = kunyomi;
 
-    console.log(kanji);
-    return kanji;
+    return {
+        type: TYPE_KANJI,
+        obj: kanji
+    };
 }
 
 function parseDefinitions(items, $) {
