@@ -90,7 +90,7 @@ function parseDefinitions(items, $) {
         }
 
         let enWord = meaning.substring(0, meaning.indexOf("|"));
-        if (enWord) meaning = meaning.replace(enWord, "").trim();
+        if (enWord) meaning = meaning.replace(enWord + "|", "").trim();
 
 
         let resultItem = {};
@@ -104,7 +104,7 @@ function parseDefinitions(items, $) {
         if (enWord) resultItem.meanings[0].enWord = enWord;
         resultItem.more = more;
 
-        deflist.push(resultItem);
+        if(resultItem.meanings[0].m.length > 0 ) deflist.push(resultItem);
     }
 
     return deflist;
