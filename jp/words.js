@@ -104,13 +104,13 @@ function parseDefinition(def, $) {
 
     let definitionObj = {
         word: word,
-        clsgrps: [
-            {
-                meanings: [{
-                    m: gloss
+        clsgrps: [{
+            meanings: [{
+                glosses: [{
+                    g: gloss
                 }]
-            }
-        ]
+            }]
+        }]
     };
 
     if (kanji != "") definitionObj.kanji = kanji;
