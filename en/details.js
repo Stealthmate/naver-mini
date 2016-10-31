@@ -11,7 +11,6 @@ const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
 function parseDefs(container, $) {
 
-
     let dts = container.children("dt");
     let defsArr = [];
 
@@ -50,7 +49,7 @@ function parseDefs(container, $) {
     return defsArr;
 }
 
-function parseDetailsFromKr(html, resolve) {
+function parseDetailsFromKr(html) {
     let $ = require('cheerio').load(html);
 
     let resultObj = {};
@@ -65,12 +64,12 @@ function parseDetailsFromKr(html, resolve) {
     resultObj.clsgrps = [];
     resultObj.clsgrps.push({});
     resultObj.clsgrps[0].wclass = "";
-    resultObj.clsgrps[0].meanings = parseDefs($("#zoom_content").children().eq(1).children("dl"), $);
+    resultObj.clsgrps[0].meanings = parseDefs($("#zoom_content").children("div").children("dl"), $);
 
-    resolve(resultObj);
+    return resultObj;
 }
 
-function parseDetailsFromEn(html, resolve) {
+function parseDetailsFromEn(html) {
     let $ = require('cheerio').load(html);
 
     let resultObj = {};
@@ -118,8 +117,8 @@ function lookUp(link) {
                 })
                 .on('end', () => {
                     let result = null;
-                    if (link.indexOf("en") == 0) result = parseDetailsFromEn(html, resolve);
-                    else result = parseDetailsFromKr(html, resolve);
+                    if (link.indexOf("en") == 0) result = parseDetailsFromEn(html);
+                    else result = parseDetailsFromKr(html);
 
                     result.more = link;
                     resolve(result);
