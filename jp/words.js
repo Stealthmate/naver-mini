@@ -19,7 +19,7 @@ const MARK_KUNYOMI = "훈독";
 const MARK_STROKES = "총획";
 const MARK_RADICAL = "부수";
 
-const TYPE_DEFINITION = "d";
+const TYPE_DEFINITION = 0;
 const TYPE_KANJI = "k";
 
 const MOREINFO_WIKTIONARY = "wiktionary";
@@ -34,7 +34,7 @@ function parseDefinitionHeader(header, $) {
 function parseMoreInfo(link) {
     let str = link;
 
-    if(link.indexOf(MOREINFO_WIKTIONARY) >= 0) {
+    if (link.indexOf(MOREINFO_WIKTIONARY) >= 0) {
         return link;
     }
 
@@ -103,16 +103,21 @@ function parseDefinition(def, $) {
     }
 
     let definitionObj = {
-        type: TYPE_DEFINITION,
         word: word,
-        gloss: gloss
+        meanings: [{
+            m: gloss,
+            ex: []
+        }]
     };
 
     if (kanji != "") definitionObj.kanji = kanji;
-    if (wordClasses.length > 0) definitionObj.class = wordClasses;
+    if (wordClasses.length > 0) definitionObj.wclass = wordClasses.join(";");
     if (more) definitionObj.more = more;
 
-    return definitionObj;
+    return {
+        type: TYPE_DEFINITION,
+        obj: definitionObj
+    };
 }
 
 function parseKanji(container, $) {
@@ -151,8 +156,8 @@ function parseKanji(container, $) {
         more: more
     }
 
-    if(onyomi.length > 0) kanji.on = onyomi;
-    if(kunyomi.length > 0) kanji.kun = kunyomi;
+    if (onyomi.length > 0) kanji.on = onyomi;
+    if (kunyomi.length > 0) kanji.kun = kunyomi;
 
     console.log(kanji);
     return kanji;
@@ -169,8 +174,7 @@ function parseDefinitions(items, $) {
 
         if (def.find(".entry.type_hj").length > 0) {
             deflist[i] = parseKanji(def, $);
-        }
-        else deflist[i] = parseDefinition(def, $);
+        } else deflist[i] = parseDefinition(def, $);
     }
 
     return deflist;
