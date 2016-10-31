@@ -20,7 +20,7 @@ const MARK_STROKES = "총획";
 const MARK_RADICAL = "부수";
 
 const TYPE_DEFINITION = 0;
-const TYPE_KANJI = "k";
+const TYPE_KANJI = 1;
 
 const MOREINFO_WIKTIONARY = "wiktionary";
 
