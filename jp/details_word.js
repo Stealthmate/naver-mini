@@ -119,8 +119,8 @@ function parseDetails(html, resolve) {
         }
 
         let wordclassObj = {
-            "class": wordclass,
-            mean: meanings
+            wclass: wordclass,
+            meanings: meanings
         };
         wordclasses.push(wordclassObj);
     }
@@ -128,7 +128,7 @@ function parseDetails(html, resolve) {
     let result = {};
     result.word = word;
     result.kanji = kanji;
-    result.meanings = wordclasses;
+    result.clsgrps = wordclasses;
     resolve(result);
 
 }
