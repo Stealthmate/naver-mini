@@ -64,7 +64,7 @@ function parseDetailsFromKr(html) {
     resultObj.clsgrps = [];
     resultObj.clsgrps.push({});
     resultObj.clsgrps[0].wclass = "";
-    resultObj.clsgrps[0].meanings = parseDefs($("#zoom_content").children("div").children("dl"), $);
+    resultObj.clsgrps[0].meanings = parseDefs($("#zoom_content").children("div").children("dl.list_a11"), $);
 
     return resultObj;
 }
