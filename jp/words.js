@@ -148,18 +148,25 @@ function parseKanji(container, $) {
     radical = lastRow.substring(0, lastRow.indexOf('('));
     let meaning = lastRow.substring(lastRow.indexOf('|') + 1).split(" ");
 
+    let meanArr = [];
+    for (let i = 0; i <= meaning.length - 1; i++) {
+        meanArr.push({
+            m: meaning[i]
+        });
+    }
+
     let more = parseMoreInfo($(container).find(".type_hj a").attr("href"));
 
     let kanji = {
-        ji: ji,
-        str: strokes,
-        rad: radical,
-        mean: meaning,
+        kanji: ji.charAt(0),
+        strokes: strokes,
+        radical: radical.charAt(0),
+        meanings: meanArr,
         more: more
     }
 
-    if (onyomi.length > 0) kanji.on = onyomi;
-    if (kunyomi.length > 0) kanji.kun = kunyomi;
+    if (onyomi.length > 0) kanji.onyomi = onyomi;
+    if (kunyomi.length > 0) kanji.kunyomi = kunyomi;
 
     return {
         type: TYPE_KANJI,
