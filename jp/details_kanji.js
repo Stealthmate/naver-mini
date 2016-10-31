@@ -79,7 +79,7 @@ function parseDetails(html, resolve) {
     let kr_readings = radicalRow.substring(radicalRow.indexOf(')') + 1).split(" ");
     kr_readings = kr_readings.slice(0, kr_readings.length - 1);
 
-    let meaningContainers = $(container).find("#meaningDiv .section ol li");
+    let meaningContainers = $(container).find("#meaningDiv .section ol, ul li");
     let meanings = [];
     for (let i = 0; i <= meaningContainers.length - 1; i++) {
         let mean = $(meaningContainers[i]).find(".lst_txt").text();
