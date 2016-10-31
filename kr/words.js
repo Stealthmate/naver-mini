@@ -72,8 +72,7 @@ function parseDefinitions(sec, $) {
         }
 
         let definitionObj = {
-            def: gloss,
-            ex: []
+            def: gloss
         };
 
         let defobj = {

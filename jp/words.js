@@ -104,14 +104,17 @@ function parseDefinition(def, $) {
 
     let definitionObj = {
         word: word,
-        meanings: [{
-            m: gloss,
-            ex: []
-        }]
+        clsgrps: [
+            {
+                meanings: [{
+                    m: gloss
+                }]
+            }
+        ]
     };
 
     if (kanji != "") definitionObj.kanji = kanji;
-    if (wordClasses.length > 0) definitionObj.wclass = wordClasses.join(";");
+    if (wordClasses.length > 0) definitionObj.clsgrps[0].wclass = wordClasses.join(";");
     if (more) definitionObj.more = more;
 
     return {
