@@ -111,10 +111,15 @@ function parseDetails(html, resolve) {
             let examples = parseExamples(meaningContainers[j], $);
 
             let meaningObj = {
-                m: meaning
+                glosses: [{
+                    g: meaning
+                }]
             };
-            if(glosses.length > 0) meaningObj.gloss = glosses;
-            if(examples && examples.length > 0) meaningObj.ex = examples;
+            if(glosses.length > 0) {
+                meaningObj.m = meaning;
+                meaningObj.glosses = glosses;
+            }
+            if(examples && examples.length > 0) meaningObj.glosses[0].ex = examples;
             meanings.push(meaningObj);
         }
 
