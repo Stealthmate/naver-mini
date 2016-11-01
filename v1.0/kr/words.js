@@ -87,6 +87,18 @@ function parseDefinitions(sec, $) {
         if(!isOpenKR) deflist.push(defobj);
     }
 
+    /*
+        Add dummy value to inform user to update client
+    */
+
+    let defobj = {
+        word: "WARNING!",
+        gloss: "You are using an old version of the API. Please update your client!",
+        more: "__update"
+    };
+
+    deflist.unshift(defobj);
+
     return deflist;
 }
 

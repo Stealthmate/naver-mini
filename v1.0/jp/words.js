@@ -173,6 +173,14 @@ function parseDefinitions(items, $) {
         else deflist[i] = parseDefinition(def, $);
     }
 
+
+    let warning = "WARNING! You are using an old version of the API. Please update your client!";
+    let definitionObj = {
+        type: TYPE_DEFINITION,
+        word: "WARNING!",
+        gloss: warning
+    };
+    deflist.unshift(definitionObj);
     return deflist;
 }
 

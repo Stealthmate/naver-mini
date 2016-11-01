@@ -24,6 +24,13 @@ function parseResult(html, resolve) {
         examples.push(ex);
     }
 
+    /*
+        Add dummy value to inform user to update client
+    */
+
+    let warning = "WARNING! You are using an old version of the API. Please update your client!"
+    examples.unshift(warning);
+
     resolve(examples);
 }
 

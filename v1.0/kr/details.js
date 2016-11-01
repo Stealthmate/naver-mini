@@ -87,6 +87,22 @@ const heapdump = require('heapdump');
 
 function serve(req, res) {
 
+    let warning = "WARNING! You are using an old version of the API. Please update your client!"
+
+    if(!('lnk' in req.query)) res(warning);
+    else if(req.query.lnk == "__update") {
+        let resultobj = {
+            word: "WARNING!",
+            defs: [
+                {
+                    def: "You are using an old version of the API. Please update your client!"
+                }
+            ]
+        }
+        res.send(resultobj);
+    };
+
+
     let link = decodeURIComponent(req.query.lnk);
     let page = undefined;
     let pagesize = undefined;
