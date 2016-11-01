@@ -71,17 +71,22 @@ function parseDefinitions(sec, $) {
             more = parseMoreInfo($(def.find(".fnt15")).attr("href"));
         }
 
+        let definitionObj = {
+            def: gloss
+        };
+
         let defobj = {
                 word: header.word,
-                gloss: gloss
+                defs: [definitionObj]
         }
 
         let isOpenKR = false;
 
         if (header.hanja) defobj.hanja = header.hanja;
         if (header.pronun) defobj.pronun = header.pronun;
-        if (wordclass.length > 0) defobj.class = wordclass;
+        if (wordclass.length > 0) defobj.wclass = wordclass.join(";");
         if (more) defobj.more = more;
+
         if ($(def.find(".fnt15")).attr("href").indexOf(MARK_OPENKR) >= 0) isOpenKR = true;
 
         if(!isOpenKR) deflist.push(defobj);
@@ -97,9 +102,7 @@ function parseResult(html, resolve) {
 
     let definitions = parseDefinitions(sections.find(".head_word").parent().parent().children(".lst3"), $);
 
-    let resultobj = {
-        defs: definitions
-    };
+    let resultobj = definitions;
 
     resolve(resultobj);
 }

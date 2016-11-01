@@ -28,7 +28,7 @@ app.use(compression());
 
 //Bindings for old API on default URI
 {
-    let API = 1.0;
+    let API = 1;
     let paths = require("./v1.0");
     app.get("/kr", paths.kr.words);
     app.get("/kr/details", paths.kr.details);
@@ -43,25 +43,24 @@ app.use(compression());
 
 //Bindings for current API on new URI
 {
-    let API = 2.0;
+    let API = 2;
     let paths = {
         kr: require("./kr"),
         jp: require("./jp"),
         en: require("./en")
     };
-    app.get("/" + API + "/kr", paths.kr.words);
-    app.get("/" + API + "/kr/details", paths.kr.details);
-    app.get("/" + API + "/kr/ex", paths.kr.examples)
+    app.get("/v" + API + "/kr", paths.kr.words);
+    app.get("/v" + API + "/kr/details", paths.kr.details);
+    app.get("/v" + API + "/kr/ex", paths.kr.examples)
 
-    app.get("/" + API + "/jp", paths.jp.words);
-    app.get("/" + API + "/jp/details", paths.jp.details);
-    app.get("/" + API + "/jp/ex", paths.jp.examples);
+    app.get("/v" + API + "/jp", paths.jp.words);
+    app.get("/v" + API + "/jp/details", paths.jp.details);
+    app.get("/v" + API + "/jp/ex", paths.jp.examples);
 
-    app.get("/" + API + "/en", paths.en.words);
+    app.get("/v" + API + "/en", paths.en.words);
+    app.get("/v" + API + "/en", require("./en").words);
+    app.get("/v" + API + "/en/details", require("./en").details);
 }
-
-
-
 
 const PORT = process.env.PORT || ARGS.port || 80;
 

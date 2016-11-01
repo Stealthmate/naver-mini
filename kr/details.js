@@ -10,15 +10,20 @@ const WHITESPACE = /[ \n\t]+/g;
 
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
-function parseDetails(html, resolve) {
+const MARK_PRONUN = "발음";
+
+function parseDetails(html) {
     let $ = require('cheerio').load(html);
 
-    let hanja = $(".spot_area#wordArea h3 .hanja").text().trim().replace(WHITESPACE, " ");
+    let titleArea = $(".spot_area#wordArea h3");
 
-    let word = $(".spot_area#wordArea h3").children().remove().end().text().trim().replace(WHITESPACE, " ");
+    let hanja = titleArea.find(".cha").text().trim().replace(WHITESPACE, " ");
+    let pronun = titleArea.children("em:contains('" + MARK_PRONUN + "')").text().replace(WHITESPACE, " ").trim();
+    pronun = pronun.substring(pronun.indexOf(": ") + 2, pronun.length - 1);
+
+    let word = titleArea.children().remove().end().text().trim().replace(WHITESPACE, " ");
 
     let wordclass = $("#meanArea h4").text().trim().replace(WHITESPACE, " ");
-
 
     let glosses = $("dl.lst > dt");
     let examplelists = $("dl.lst > dd");
@@ -54,12 +59,15 @@ function parseDetails(html, resolve) {
     }
 
     let resultobj = {};
+
     resultobj.word = word;
-    if(hanja) resultobj.hanja = hanja;
-    if(wordclass) resultobj.wordclass = wordclass;
+    if (hanja) resultobj.hanja = hanja;
+    if (wordclass) resultobj.wclass = wordclass;
+    if (pronun) resultobj.pronun = pronun;
+
     resultobj.defs = glossesobjs;
 
-    resolve(resultobj);
+    return resultobj;
 
 }
 
@@ -77,7 +85,9 @@ function lookUp(link) {
                     html = html + chunk;
                 })
                 .on('end', () => {
-                    parseDetails(html, resolve);
+                    let resultObj = parseDetails(html);
+                    resultObj.more = link;
+                    resolve(resultObj);
                 });
         });
         req.end();

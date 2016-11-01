@@ -22,7 +22,7 @@ const REQUEST_OPTIONS = {
 
 const WHITESPACE = /[ \r\n\t]+/g;
 
-const WORDCLASS = /(^|\n)[\[\(][^\[\]]+[\]\)]/g;
+const WORDCLASS = /(^|\n)[\[\(][^\[\]\)\(]+[\]\)]/g;
 
 const TYPE_DEFINITION = "d";
 const TYPE_KANJI = "k";
@@ -39,7 +39,7 @@ function parseDefinitionHeader(header, $) {
 function parseMoreInfo(link) {
     let str = link;
 
-    if(link.indexOf(MOREINFO_WIKTIONARY) >= 0) {
+    if (link.indexOf(MOREINFO_WIKTIONARY) >= 0) {
         return link;
     }
 
@@ -60,36 +60,56 @@ function parseDefinitions(items, $) {
 
         let def = $(defs[i]);
         def = def.children("a").remove().end();
-        let word = $(def.children("span")[0]).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
-        let pronun = $(def.children("span")[1]).text().trim().replace(WHITESPACE, " ");
+        //let word = $(def.children("span")[0]).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
+        let word = def.children().eq(0).children().eq(0).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
+
+        let more = def.children().eq(0).children().eq(0).attr("href").replace(/&query=.*/, "");
+
+        //let pronun = $(def.children("span")[1]).text().trim().replace(WHITESPACE, " ");
+        let pronun = def.children("span").eq(1).text().trim().replace(WHITESPACE, " ");
+        if (pronun.indexOf("[") < 0) pronun = "";
         pronun = pronun.replace(/[\[\]]/g, "");
         pronun = pronun.replace("|", "'");
 
-        let hanja = $(def.children("span")[0]).children().remove().end().text().trim().replace(WHITESPACE, " ");
-        if(hanja) word = word.replace(hanja, "").trim();
+        let hanja = null;
+        if (!pronun) hanja = def.children().eq(0).children().remove().end().text().trim().replace(WHITESPACE, " ");
 
         let defd = $(def.nextUntil("dt").children("div").children("p")[0]);
-        let meaning = ($(defd.children("span")[0]).text() + $(defd.children("span")[0]).nextUntil("img").text()).trim().replace(WHITESPACE, " ");
-        if(meaning.length == 0) meaning = defd.text().trim().replace(WHITESPACE,  " ");
+        let meaningContainer = $(defd.children("span")[0]).nextUntil("img");
+        let meaning = ($(defd.children("span")[0]).text() + meaningContainer.text()).replace(WHITESPACE, " ").trim();
+
+        if (meaning.length == 0) meaning = defd.text().trim().replace(WHITESPACE, " ");
 
         let wordclasses = meaning.match(WORDCLASS);
 
-        if(wordclasses != null) {
-            for(let j=0;j<=wordclasses.length-1;j++) {
+        if (wordclasses != null) {
+            for (let j = 0; j <= wordclasses.length - 1; j++) {
                 meaning = meaning.replace(wordclasses[j], "");
                 wordclasses[j] = wordclasses[j].replace(/[\[\]\(\)]/g, "");
             }
         }
 
+        let enWord = meaning.substring(0, meaning.indexOf("|"));
+        if (enWord) meaning = meaning.replace(enWord + "|", "").trim();
+
+
         let resultItem = {};
         resultItem.word = word;
-        if(pronun) resultItem.pronun = pronun;
-        if(hanja) resultItem.hanja = hanja;
-        if(wordclasses != null) resultItem.class = wordclasses;
-        resultItem.meaning = meaning;
+        if (pronun) resultItem.pronun = pronun;
+        if (hanja) resultItem.hanja = hanja;
+        resultItem.clsgrps = [{
+            meanings: [{
+                m: meaning
+            }
+            ]
 
-        deflist.push(resultItem);
+        }];
+        if (wordclasses != null) resultItem.clsgrps[0].wclass = wordclasses.join(";");
+        if (enWord) resultItem.clsgrps[0].meanings[0].enWord = enWord;
+        resultItem.more = more;
+        if(resultItem.more.charAt(0) == "/") resultItem.more = resultItem.more.substring(1);
 
+        if(resultItem.clsgrps[0].meanings[0].m.length > 0 ) deflist.push(resultItem);
     }
 
     return deflist;

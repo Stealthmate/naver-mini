@@ -19,8 +19,8 @@ const MARK_KUNYOMI = "훈독";
 const MARK_STROKES = "총획";
 const MARK_RADICAL = "부수";
 
-const TYPE_DEFINITION = "d";
-const TYPE_KANJI = "k";
+const TYPE_DEFINITION = 0;
+const TYPE_KANJI = 1;
 
 const MOREINFO_WIKTIONARY = "wiktionary";
 
@@ -34,7 +34,7 @@ function parseDefinitionHeader(header, $) {
 function parseMoreInfo(link) {
     let str = link;
 
-    if(link.indexOf(MOREINFO_WIKTIONARY) >= 0) {
+    if (link.indexOf(MOREINFO_WIKTIONARY) >= 0) {
         return link;
     }
 
@@ -103,16 +103,24 @@ function parseDefinition(def, $) {
     }
 
     let definitionObj = {
-        type: TYPE_DEFINITION,
         word: word,
-        gloss: gloss
+        clsgrps: [{
+            meanings: [{
+                glosses: [{
+                    g: gloss
+                }]
+            }]
+        }]
     };
 
     if (kanji != "") definitionObj.kanji = kanji;
-    if (wordClasses.length > 0) definitionObj.class = wordClasses;
+    if (wordClasses.length > 0) definitionObj.clsgrps[0].wclass = wordClasses.join(";");
     if (more) definitionObj.more = more;
 
-    return definitionObj;
+    return {
+        type: TYPE_DEFINITION,
+        obj: definitionObj
+    };
 }
 
 function parseKanji(container, $) {
@@ -140,22 +148,30 @@ function parseKanji(container, $) {
     radical = lastRow.substring(0, lastRow.indexOf('('));
     let meaning = lastRow.substring(lastRow.indexOf('|') + 1).split(" ");
 
+    let meanArr = [];
+    for (let i = 0; i <= meaning.length - 1; i++) {
+        meanArr.push({
+            m: meaning[i]
+        });
+    }
+
     let more = parseMoreInfo($(container).find(".type_hj a").attr("href"));
 
     let kanji = {
-        type: TYPE_KANJI,
-        ji: ji,
-        str: strokes,
-        rad: radical,
-        mean: meaning,
+        kanji: ji.charAt(0),
+        strokes: strokes,
+        radical: radical.charAt(0),
+        meanings: meanArr,
         more: more
     }
 
-    if(onyomi.length > 0) kanji.on = onyomi;
-    if(kunyomi.length > 0) kanji.kun = kunyomi;
+    if (onyomi.length > 0) kanji.onyomi = onyomi;
+    if (kunyomi.length > 0) kanji.kunyomi = kunyomi;
 
-    console.log(kanji);
-    return kanji;
+    return {
+        type: TYPE_KANJI,
+        obj: kanji
+    };
 }
 
 function parseDefinitions(items, $) {
@@ -169,8 +185,7 @@ function parseDefinitions(items, $) {
 
         if (def.find(".entry.type_hj").length > 0) {
             deflist[i] = parseKanji(def, $);
-        }
-        else deflist[i] = parseDefinition(def, $);
+        } else deflist[i] = parseDefinition(def, $);
     }
 
     return deflist;

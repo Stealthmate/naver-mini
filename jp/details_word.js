@@ -75,11 +75,7 @@ function parseDetails(html, resolve) {
 
     let word = $(".spot_area .maintitle").text();
     let kanji = $(".spot_area .ps").text();
-    kanji = kanji.substring(1, kanji.length-1);
-    console.log(word);
-    console.log(kanji);
-
-
+    kanji = kanji.substring(1, kanji.length - 1);
 
     let wordclasses = [];
 
@@ -91,13 +87,12 @@ function parseDetails(html, resolve) {
         for (let j = 0; j <= meaningContainers.length - 1; j++) {
 
             let meaning = parseRuby($(meaningContainers[j]).children(".lst_txt"), $);
-            //console.log(" - - " + meaning);
 
             let glosses = [];
             let glossContainers = $(meaningContainers[j]).find(".mean_level_3 > li");
 
             for (let k = 0; k <= glossContainers.length - 1; k++) {
-                let gloss = $(glossContainers[k]).children(".lst_txt").text().trim();
+                let gloss = parseRuby($(glossContainers[k]).children(".lst_txt"), $);
                 //console.log(" - - - " + gloss);
 
                 let examples = parseExamples(glossContainers[k], $);
@@ -111,16 +106,21 @@ function parseDetails(html, resolve) {
             let examples = parseExamples(meaningContainers[j], $);
 
             let meaningObj = {
-                m: meaning
+                glosses: [{
+                    g: meaning
+                }]
             };
-            if(glosses.length > 0) meaningObj.gloss = glosses;
-            if(examples && examples.length > 0) meaningObj.ex = examples;
+            if (glosses.length > 0) {
+                meaningObj.m = meaning;
+                meaningObj.glosses = glosses;
+            }
+            if (examples && examples.length > 0) meaningObj.glosses[0].ex = examples;
             meanings.push(meaningObj);
         }
 
         let wordclassObj = {
-            "class": wordclass,
-            mean: meanings
+            wclass: wordclass,
+            meanings: meanings
         };
         wordclasses.push(wordclassObj);
     }
@@ -128,7 +128,7 @@ function parseDetails(html, resolve) {
     let result = {};
     result.word = word;
     result.kanji = kanji;
-    result.meanings = wordclasses;
+    result.clsgrps = wordclasses;
     resolve(result);
 
 }
