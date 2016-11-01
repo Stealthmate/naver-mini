@@ -76,10 +76,6 @@ function parseDetails(html, resolve) {
     let word = $(".spot_area .maintitle").text();
     let kanji = $(".spot_area .ps").text();
     kanji = kanji.substring(1, kanji.length - 1);
-    console.log(word);
-    console.log(kanji);
-
-
 
     let wordclasses = [];
 

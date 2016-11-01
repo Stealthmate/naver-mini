@@ -106,7 +106,8 @@ function parseDefinitions(items, $) {
         }];
         if (wordclasses != null) resultItem.clsgrps[0].wclass = wordclasses.join(";");
         if (enWord) resultItem.clsgrps[0].meanings[0].enWord = enWord;
-        resultItem.more = more.substring(1);
+        resultItem.more = more;
+        if(resultItem.more.charAt(0) == "/") resultItem.more = resultItem.more.substring(1);
 
         if(resultItem.clsgrps[0].meanings[0].m.length > 0 ) deflist.push(resultItem);
     }
