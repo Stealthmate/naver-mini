@@ -87,6 +87,7 @@ function lookUp(link) {
                 .on('end', () => {
                     let resultObj = parseDetails(html);
                     resultObj.more = link;
+                    resultObj.partial = false;
                     resolve(resultObj);
                 });
         });
