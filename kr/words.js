@@ -58,18 +58,20 @@ function parseDefinitions(sec, $) {
 
         let gloss = "";
         let more = undefined;
+        let partial = false;
 
         if (glosses.length < 1) {
             glosses = $(def.find("p"));
         } else {
-            more = parseMoreInfo($(def.find(".fnt15")).attr("href"));
+            partial = true;
         }
 
         gloss = $(glosses[0]).text().replace(toReplace, "").replace(/\[\]/g, "").replace(WHITESPACE, " ").trim();
 
         if(gloss.indexOf("...") > -1) {
-            more = parseMoreInfo($(def.find(".fnt15")).attr("href"));
+            partial = true;
         }
+        more = parseMoreInfo($(def.find(".fnt15")).attr("href"));
 
         let definitionObj = {
             def: gloss
@@ -85,7 +87,8 @@ function parseDefinitions(sec, $) {
         if (header.hanja) defobj.hanja = header.hanja;
         if (header.pronun) defobj.pronun = header.pronun;
         if (wordclass.length > 0) defobj.wclass = wordclass.join(";");
-        if (more) defobj.more = more;
+        defobj.more = more;
+        defobj.partial = partial;
 
         if ($(def.find(".fnt15")).attr("href").indexOf(MARK_OPENKR) >= 0) isOpenKR = true;
 
