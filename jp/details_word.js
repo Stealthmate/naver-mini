@@ -68,7 +68,7 @@ function parseExamples(container, $) {
     return examples;
 }
 
-function parseDetails(html, resolve) {
+function parseDetails(html) {
     let $ = require('cheerio').load(html);
 
     let classSections = $(".section_article");
@@ -129,8 +129,7 @@ function parseDetails(html, resolve) {
     result.word = word;
     result.kanji = kanji;
     result.clsgrps = wordclasses;
-    result.partial = false;
-    resolve(result);
+    return result;
 
 }
 
@@ -148,7 +147,9 @@ function serve(link, page, pagesize) {
                     html = html + chunk;
                 })
                 .on('end', () => {
-                    parseDetails(html, resolve);
+                    let resultObj = parseDetails(html);
+                    result.partial = false;
+                    resultObj.more = link;
                 });
         });
         req.end();

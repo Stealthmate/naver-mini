@@ -168,8 +168,7 @@ function parseDetails(html, resolve) {
         kanji: kanji,
         strokes: strokes,
         radical: radical,
-        meanings: meanings,
-        partial: false
+        meanings: meanings
     };
     if(kr_readings) detailsObj.kr = kr_readings;
     if(onyomi) detailsObj.onyomi = onyomi;
@@ -198,6 +197,7 @@ function serve(link, page, pagesize) {
                 .on('end', () => {
                     let resultObj = parseDetails(html, resolve);
                     resultObj.more = link;
+                    resultObj.partial = false;
                     resolve(resultObj);
                 });
         });
