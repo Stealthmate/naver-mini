@@ -103,6 +103,7 @@ function parseDefinition(def, $) {
     }
 
     let definitionObj = {
+        partial: true,
         word: word,
         clsgrps: [{
             meanings: [{
@@ -162,7 +163,8 @@ function parseKanji(container, $) {
         strokes: strokes,
         radical: radical.charAt(0),
         meanings: meanArr,
-        more: more
+        more: more,
+        partial: true
     }
 
     if (onyomi.length > 0) kanji.onyomi = onyomi;

@@ -168,7 +168,8 @@ function parseDetails(html, resolve) {
         kanji: kanji,
         strokes: strokes,
         radical: radical,
-        meanings: meanings
+        meanings: meanings,
+        partial: false
     };
     if(kr_readings) detailsObj.kr = kr_readings;
     if(onyomi) detailsObj.onyomi = onyomi;

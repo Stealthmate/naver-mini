@@ -121,6 +121,7 @@ function lookUp(link) {
                     else result = parseDetailsFromKr(html);
 
                     result.more = link;
+                    result.partial = false;
                     resolve(result);
                 });
         });

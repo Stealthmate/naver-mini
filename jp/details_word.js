@@ -129,6 +129,7 @@ function parseDetails(html, resolve) {
     result.word = word;
     result.kanji = kanji;
     result.clsgrps = wordclasses;
+    result.partial = false;
     resolve(result);
 
 }

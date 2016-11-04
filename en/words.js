@@ -94,6 +94,7 @@ function parseDefinitions(items, $) {
 
 
         let resultItem = {};
+        resultitem.partial = true;
         resultItem.word = word;
         if (pronun) resultItem.pronun = pronun;
         if (hanja) resultItem.hanja = hanja;
