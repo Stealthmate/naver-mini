@@ -94,7 +94,7 @@ function parseDefinitions(items, $) {
 
 
         let resultItem = {};
-        resultitem.partial = true;
+        resultItem.partial = true;
         resultItem.word = word;
         if (pronun) resultItem.pronun = pronun;
         if (hanja) resultItem.hanja = hanja;
@@ -116,7 +116,7 @@ function parseDefinitions(items, $) {
     return deflist;
 }
 
-function parseResult(html, resolve) {
+function parseResult(html) {
     let $ = require('cheerio').load(html);
 
 
@@ -126,7 +126,7 @@ function parseResult(html, resolve) {
 
     let resultobj = definitions;
 
-    resolve(resultobj);
+    return resultobj;
 }
 
 function lookUp(query, page) {
@@ -144,7 +144,8 @@ function lookUp(query, page) {
                     html = html + chunk;
                 })
                 .on('end', () => {
-                    parseResult(html, resolve);
+                    let resultObj = parseResult(html);
+                    resolve(resultObj);
                 });
         });
         req.end();
