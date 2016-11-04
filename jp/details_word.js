@@ -148,7 +148,7 @@ function serve(link, page, pagesize) {
                 })
                 .on('end', () => {
                     let resultObj = parseDetails(html);
-                    result.partial = false;
+                    resultObj.partial = false;
                     resultObj.more = link;
                 });
         });
