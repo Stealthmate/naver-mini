@@ -87,23 +87,22 @@ function parseDefinition(def, $) {
 
     let gloss = $(glosses[0]);
     let more = undefined;
+    let partial = true;
 
     if (glosses.length < 1) {
         gloss = definition;
+        partial = false;
 
-    } else {
-        more = parseMoreInfo($(def.find("a.mw")).attr("href"));
     }
+    more = parseMoreInfo($(def.find("a.mw")).attr("href"));
 
     let replaceWordClassInDefinition = new RegExp("\\[(" + wordClasses.join("|") + ")\\]", "g");
     gloss = parseRuby(gloss, $).replace(replaceWordClassInDefinition, "").replace(/\[\]/g, "").replace(WHITESPACE, " ").trim();
 
-    if (gloss.indexOf("...") > -1) {
-        more = parseMoreInfo($(def.find("a.mw")).attr("href"));
-    }
+    more = parseMoreInfo($(def.find("a.mw")).attr("href"));
 
     let definitionObj = {
-        partial: true,
+        partial: partial,
         word: word,
         clsgrps: [{
             meanings: [{
