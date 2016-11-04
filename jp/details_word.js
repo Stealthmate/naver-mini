@@ -150,6 +150,7 @@ function serve(link, page, pagesize) {
                     let resultObj = parseDetails(html);
                     resultObj.partial = false;
                     resultObj.more = link;
+                    resolve(resultObj);
                 });
         });
         req.end();
