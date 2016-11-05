@@ -120,7 +120,8 @@ function lookUp(link) {
                     if (link.indexOf("en") == 0) result = parseDetailsFromEn(html);
                     else result = parseDetailsFromKr(html);
 
-                    result.more = link;
+                    //hack for endic links
+                    result.more = link.substring(0, link.indexOf("&sLn="));
                     result.partial = false;
                     resolve(result);
                 });
