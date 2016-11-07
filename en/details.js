@@ -69,6 +69,14 @@ function parseDetailsFromKr(html) {
     return resultObj;
 }
 
+function parseDetailsFromEnIdiom(html) {
+    let $ = require('cheerio').load(html);
+
+    let resultObj = {};
+
+    return resultObj;
+}
+
 function parseDetailsFromEn(html) {
     let $ = require('cheerio').load(html);
 
@@ -117,7 +125,10 @@ function lookUp(link) {
                 })
                 .on('end', () => {
                     let result = null;
-                    if (link.indexOf("en") == 0) result = parseDetailsFromEn(html);
+                    if (link.indexOf("en") == 0) {
+                        if(link.indexOf("Idiom") < 0) result = parseDetailsFromEn(html);
+                        else result = parseDetailsFromEnIdiom(html);
+                    }
                     else result = parseDetailsFromKr(html);
 
                     //hack for endic links
