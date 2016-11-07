@@ -1,14 +1,3 @@
-const REQUEST_OPTIONS = {
-    host: "krdic.naver.com",
-    port: 80,
-    path: "/",
-    method: 'GET'
-};
-
-const WHITESPACE = /[ \n\t]+/g;
-
-const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
-
 const DETAILS_KANJI = "hanja";
 
 function serve(req, res) {
