@@ -20,8 +20,12 @@ function parseResult(html, resolve) {
     let exContainer = $("#content .section > ul > li");
     for (let i = 0; i <= exContainer.length - 1; i++) {
         let exItem = $(exContainer[i]);
+        let keyword = exItem.find("span.ex > a > strong").text().trim().replace(WHITESPACE, " ");
         let ex = exItem.find("span").remove(".ex").end().text().trim().replace(WHITESPACE, " ");
-        examples.push(ex);
+        examples.push({
+            ex: ex,
+            keword: keyword
+        });
     }
 
     resolve(examples);
