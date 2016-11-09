@@ -63,7 +63,7 @@ function parseDefinitions(items, $) {
         //let word = $(def.children("span")[0]).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
         let word = def.children().eq(0).children().eq(0).find("sup").remove().end().text().trim().replace(WHITESPACE, " ");
 
-        let more = def.children().eq(0).children().eq(0).attr("href").replace(/&query=.*/, "");
+        let more = def.children().eq(0).children().eq(0).attr("href").replace(/&query=[^&]*/, "");
 
         //let pronun = $(def.children("span")[1]).text().trim().replace(WHITESPACE, " ");
         let pronun = def.children("span").eq(1).text().trim().replace(WHITESPACE, " ");
@@ -107,9 +107,7 @@ function parseDefinitions(items, $) {
         }];
         if (wordclasses != null) resultItem.clsgrps[0].wclass = wordclasses.join(";");
         if (enWord) resultItem.clsgrps[0].meanings[0].enWord = enWord;
-        resultItem.more = more;
-
-        if(resultItem.more.indexOf("Idiom") > 0) resultItem.partial = false;
+        resultItem.more = more + "&sLn=en";
 
         if(resultItem.more.charAt(0) == "/") resultItem.more = resultItem.more.substring(1);
 
