@@ -73,8 +73,7 @@ function parseDetailsFromEnIdiom(html) {
     let $ = require('cheerio').load(html);
 
     let resultObj = {};
-
-    return resultObj;
+    return parseDetailsFromEn(html);
 }
 
 function parseDetailsFromEn(html) {
@@ -83,6 +82,7 @@ function parseDetailsFromEn(html) {
     let resultObj = {};
 
     let title = $("#content .word_view");
+
     let word = title.find(".tit h3").text().trim().replace(WHITESPACE, " ");
     resultObj.word = word;
 
@@ -91,7 +91,7 @@ function parseDetailsFromEn(html) {
 
     resultObj.clsgrps = [];
 
-    let wclassSections = $("#zoom_content .box_wrap1").has("dl");
+    let wclassSections = $("#zoom_content .box_wrap1, .box_wrap24").eq(0).has("dl");
 
     for (let i = 0; i <= wclassSections.length - 1; i++) {
         let content = $(wclassSections[i]);
