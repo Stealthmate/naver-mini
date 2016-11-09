@@ -24,7 +24,9 @@ function parseResult(html, resolve) {
         let ex = exItem.find("span").remove(".ex").end().text().trim().replace(WHITESPACE, " ");
         examples.push({
             ex: ex,
-            keword: keyword
+            keword: keyword,
+            from: "KR",
+            to: "KR"
         });
     }
 
