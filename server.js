@@ -26,10 +26,13 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 app.use(compression());
 
 
-//Bindings for old API on default URI
+//Bindings for new API on default URI
 {
-    let API = 1;
-    let paths = require("./v1.0");
+    let paths = {
+        kr: require("./kr"),
+        jp: require("./jp"),
+        en: require("./en")
+    };
     app.get("/kr", paths.kr.words);
     app.get("/kr/details", paths.kr.details);
     app.get("/kr/ex", paths.kr.examples)
@@ -41,14 +44,10 @@ app.use(compression());
     app.get("/en", paths.en.words);
 }
 
-//Bindings for current API on new URI
+//Bindings for old API on v2 URI
 {
     let API = 2;
-    let paths = {
-        kr: require("./kr"),
-        jp: require("./jp"),
-        en: require("./en")
-    };
+    let paths = require("./v2.1");
     app.get("/v" + API + "/kr", paths.kr.words);
     app.get("/v" + API + "/kr/details", paths.kr.details);
     app.get("/v" + API + "/kr/ex", paths.kr.examples)
@@ -58,8 +57,7 @@ app.use(compression());
     app.get("/v" + API + "/jp/ex", paths.jp.examples);
 
     app.get("/v" + API + "/en", paths.en.words);
-    app.get("/v" + API + "/en", require("./en").words);
-    app.get("/v" + API + "/en/details", require("./en").details);
+    app.get("/v" + API + "/en/details", paths.en.details);
 }
 
 const PORT = process.env.PORT || ARGS.port || 80;
