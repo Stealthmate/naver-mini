@@ -17,3 +17,9 @@ input {
     width: 10vmax;
     height: 3.5vmax;
 }
+
+td {
+
+    font-size: 15pt;
+    text-align: center;
+}
