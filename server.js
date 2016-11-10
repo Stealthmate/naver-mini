@@ -68,6 +68,7 @@ app.use(compression());
     app.get("/jp/ex", paths.jp.examples);
 
     app.get("/en", paths.en.words);
+    app.get("/en/details", paths.en.details);
 }
 
 //Bindings for old API on v2 URI
