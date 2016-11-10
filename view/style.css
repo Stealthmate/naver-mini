@@ -8,6 +8,12 @@ body {
 
 .paypal {
     display: block;
-    width: 110pt;
+    width: 10vmax;
+    height: 10vmax;
     margin: auto;
+}
+
+input {
+    width: 10vmax;
+    height: 3.5vmax;
 }
