@@ -26,6 +26,32 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 app.use(compression());
 
 
+//Bindings for website view
+{
+
+
+    const viewfolder = './view/';
+
+
+    app.get("/", (req, res) => {
+        res.sendFile(viewfolder + "index.html", {
+            root: __dirname
+        });
+    })
+
+    const fs = require('fs');
+    fs.readdir(viewfolder, (err, files) => {
+        files.forEach(file => {
+            app.get("/" + file, (req, res) => {
+                res.sendFile(viewfolder + file, {
+                    root: __dirname
+                });
+            })
+
+        });
+    })
+}
+
 //Bindings for new API on default URI
 {
     let paths = {

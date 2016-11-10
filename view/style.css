@@ -1,0 +1,13 @@
+h1, h2 {
+    text-align: center;
+}
+
+body {
+    padding: 0vw 2vw 0vw 2vw;
+}
+
+.paypal {
+    display: block;
+    width: 110pt;
+    margin: auto;
+}
