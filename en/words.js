@@ -87,6 +87,10 @@ function parseDefinitions(items, $) {
                 meaning = meaning.replace(wordclasses[j], "");
                 wordclasses[j] = wordclasses[j].replace(/[\[\]\(\)]/g, "");
             }
+            if(meaning.length == 0 && wordclasses.length == 1) {
+                meaning = wordclasses[0];
+                wordclasses[0] = "";
+            }
         }
 
         let enWord = meaning.substring(0, meaning.indexOf("|"));
@@ -110,7 +114,6 @@ function parseDefinitions(items, $) {
         resultItem.more = more + "&sLn=en";
 
         if(resultItem.more.charAt(0) == "/") resultItem.more = resultItem.more.substring(1);
-
         if(resultItem.clsgrps[0].meanings[0].m.length > 0 ) deflist.push(resultItem);
     }
 
