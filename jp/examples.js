@@ -21,7 +21,7 @@ function parseKR($, container) {
 
 function parseJP($, container) {
     let text = container.find("span").remove(".player, .pin").end();
-    text = require('./util.js').parseRuby(text, $).replace(WORDLINK, "").replace(WHITESPACE,  " ").trim();
+    text = require('./util.js').parseRuby(text, $).replace(WORDLINK, "").replace(WHITESPACE, " ").trim();
     return text;
 }
 
@@ -34,22 +34,29 @@ function parseResult(html, resolve) {
         let exItem = $(exContainer[i]);
 
         let original = $(exItem.children("p")[0]);
+        let keyword = exItem.children("p").find(".pin a").text().replace(WHITESPACE, " ");
         let translated = $(exItem.children("p")[1]);
 
-        if(original.has(".jp").length > 0) {
+        let from = "JP";
+        let to = "KR";
+
+        if (original.has(".jp").length > 0) {
             original = parseJP($, original);
             translated = parseKR($, translated);
         } else {
             original = parseKR($, original);
             translated = parseJP($, translated);
+            from = "KR";
+            to = "JP";
         }
 
-        let ex = {
-            original: original,
-            translated: translated
-        }
-
-        examples.push(ex);
+        examples.push({
+            ex: original,
+            tr: translated,
+            keyword: keyword,
+            from: from,
+            to: to
+        });
     }
 
     resolve(examples);
