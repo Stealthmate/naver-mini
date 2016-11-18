@@ -58,7 +58,7 @@ app.use(compression());
         kr: require("./kr"),
         jp: require("./jp"),
         en: require("./en"),
-	hj: require("./hj")
+        hj: require("./hj")
     };
     app.get("/kr", paths.kr.words);
     app.get("/kr/details", paths.kr.details);
@@ -71,8 +71,9 @@ app.use(compression());
     app.get("/en", paths.en.words);
     app.get("/en/details", paths.en.details);
     app.get("/en/ex", paths.en.details);
-    
+
     app.get("/hj", paths.hj.hanja);
+    app.get("/hj/details", paths.hj.details);
 }
 
 //Bindings for old API on v2 URI

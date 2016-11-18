@@ -37,7 +37,7 @@ function parseHanja(sec, $) {
     let hjlist = [];
 
     let hanjas = sec.children("dt");
-    let hanjadefs = sec.children("dd");  
+    let hanjadefs = sec.children("dd");
 
     for (let i = 0; i <= hanjas.length - 1; i++) {
 
@@ -45,14 +45,17 @@ function parseHanja(sec, $) {
 	let hjdef = $(hanjadefs[i]);
 
 	let namelink = hjdef.children("a").eq(0).text().replace(WHITESPACE, " ");
+
 	let meaning = hjdef.children(".meaning").text().replace(WHITESPACE, " ");
+    let meanings = meaning.split(/[0-9]\. /).slice(1);
+
 	let radical = hjdef.children(".sub_info").find("li").eq(0).find("span").text().replace(WHITESPACE, " ");
 	let strokes = hjdef.children(".sub_info").find("li").eq(1).children().remove().end().text().replace(WHITESPACE, " ");
 	strokes = parseInt(strokes.substring(0, strokes.length-1));
 	let difficulty = hjdef.children(".sub_info").find("li").eq(2).children().remove().end().text().replace(WHITESPACE, " ");
 	hjlist.push({
 		hanja: hanja,
-		meaning: meaning,
+		meaning: meanings,
 		name: namelink,
 		radical: radical,
 		strokes: strokes,
@@ -68,11 +71,7 @@ function parseResult(html) {
 
     let sections = $("#content > div.result_chn_chr");
 
-    let hanja = parseHanja(sections.find("dl"), $);
-
-    let resultobj = hanja;
-
-    return resultobj;
+    return parseHanja(sections.find("dl"), $);
 }
 
 function lookUp(query, page) {
