@@ -10,8 +10,6 @@ const REQUEST_OPTIONS = {
     method: 'GET'
 };
 
-const WHITESPACE = /[ \n\t]+/g;
-
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
 const MARK_ONYOMI = "음독";
@@ -22,28 +20,13 @@ const MARK_RADICAL = "부수";
 const TYPE_DEFINITION = 0;
 const TYPE_KANJI = 1;
 
-const MOREINFO_WIKTIONARY = "wiktionary";
+const Util = require("../util.js");
 
 function parseDefinitionHeader(header, $) {
     let headerobj = {};
-    headerobj.word = header.find("a").text().trim();
-    headerobj.kanji = header.find("span.sw > span.jp").text().trim();
+    headerobj.word = Util.shrink(header.find("a").text());
+    headerobj.kanji = Util.shrink(header.find("span.sw > span.jp").text());
     return headerobj;
-}
-
-function parseMoreInfo(link) {
-    let str = link;
-
-    if (link.indexOf(MOREINFO_WIKTIONARY) >= 0) {
-        return link;
-    }
-
-    if (link.indexOf("cc.naver.com") > -1) {
-        str = str.substring(str.indexOf("&u=")).substring(3);
-        str = decodeURIComponent(str);
-    }
-    str = str.substring(1);
-    return str;
 }
 
 function parseRuby(el, $) {
@@ -64,7 +47,7 @@ function parseDefinition(def, $) {
 
     let header = $(def).find("p.entry");
     let word = header.find("a").text().trim();
-    let kanji = header.find("span.sw > span.jp").text().trim();
+    let kanji = Util.shrink(header.find("span.subtitle, span.sw > span.jp").text().replace(/[\(\)]/g, ""));
 
     let firstRow = $(def.find("span.pin"));
 
@@ -80,7 +63,7 @@ function parseDefinition(def, $) {
 
     let wordclass = wordClasses.match(WORDCLASS) || "";
 
-    if (wordclass != "") wordClasses = wordclass.join().replace(WHITESPACE, " ").replace(/[\[\]]/g, "").split(", ");
+    if (wordclass != "") wordClasses = Util.shrink(wordclass.join()).replace(/[\[\]]/g, "").split(", ");
     else wordClasses = [];
 
     let glosses = $(def.find("li span"));
@@ -92,38 +75,31 @@ function parseDefinition(def, $) {
     if (glosses.length < 1) {
         gloss = definition;
         partial = false;
-
     }
-    more = parseMoreInfo($(def.find("a.mw")).attr("href"));
+    more = Util.extractLink($(def.find("a.mw")).attr("href"));
 
     let replaceWordClassInDefinition = new RegExp("\\[(" + wordClasses.join("|") + ")\\]", "g");
-    gloss = parseRuby(gloss, $).replace(replaceWordClassInDefinition, "").replace(/\[\]/g, "").replace(WHITESPACE, " ").trim();
+    gloss = parseRuby(gloss, $).replace(replaceWordClassInDefinition, "").replace(/\[\]/g, "");
 
-    more = parseMoreInfo($(def.find("a.mw")).attr("href"));
+    gloss = Util.shrink(gloss);
+    more = Util.extractLink($(def.find("a.mw")).attr("href"));
 
-    let definitionObj = {
-        partial: partial,
-        word: word,
-        clsgrps: [{
-            meanings: [{
-                glosses: [{
-                    g: gloss
-                }]
-            }]
-        }]
-    };
+    let JpWordEntry = require("../models/JpWordEntry.js");
 
-    if (kanji != "") definitionObj.kanji = kanji;
-    if (wordClasses.length > 0) definitionObj.clsgrps[0].wclass = wordClasses.join(";");
-    if (more) definitionObj.more = more;
+    let glossObj = new JpWordEntry.JpGloss(gloss, null);
+    let meaning = new JpWordEntry.JpMeaning(null, [glossObj]);
+    let clsgrp = new JpWordEntry.JpWordClassGroup(wordClasses.join(";"), [meaning]);
+    let definitionObj = new JpWordEntry(word, kanji, [clsgrp], partial, more);
 
     return {
         type: TYPE_DEFINITION,
-        obj: definitionObj
+        obj: definitionObj.getCompressed()
     };
 }
 
 function parseKanji(container, $) {
+
+    let JpKanjiEntry = require("../models/JpKanjiEntry.js");
 
     let ji = $(container).find(".type_hj").text();
 
@@ -150,28 +126,16 @@ function parseKanji(container, $) {
 
     let meanArr = [];
     for (let i = 0; i <= meaning.length - 1; i++) {
-        meanArr.push({
-            m: meaning[i]
-        });
+        meanArr.push(new JpKanjiEntry.JpKanjiMeaning(meaning[i], null));
     }
 
-    let more = parseMoreInfo($(container).find(".type_hj a").attr("href"));
+    let more = Util.extractLink($(container).find(".type_hj a").attr("href"));
 
-    let kanji = {
-        kanji: ji.charAt(0),
-        strokes: strokes,
-        radical: radical.charAt(0),
-        meanings: meanArr,
-        more: more,
-        partial: true
-    }
-
-    if (onyomi.length > 0) kanji.onyomi = onyomi;
-    if (kunyomi.length > 0) kanji.kunyomi = kunyomi;
+    let kanjiObj = new JpKanjiEntry(ji, strokes, radical, meanArr, null, onyomi, null, kunyomi, null, true, more);
 
     return {
         type: TYPE_KANJI,
-        obj: kanji
+        obj: kanjiObj.getCompressed()
     };
 }
 
@@ -192,38 +156,23 @@ function parseDefinitions(items, $) {
     return deflist;
 }
 
-function parseResult(html, resolve) {
+function parseResult(html) {
     let $ = require('cheerio').load(html);
 
     let sections = $(".section, .section4");
 
-    let definitions = parseDefinitions(sections.find(".srch_box"), $);
-
-    let resultobj = definitions;
-
-    resolve(resultobj);
+    return parseDefinitions(sections.find(".srch_box"), $);
 }
 
 function lookUp(query, page) {
-    return new Promise((resolve, reject) => {
-        let http = require('http');
+    if (page < 1) page = 1;
 
-        if (page < 1) page = 1;
+    REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
 
-        REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
-
-        let req = http.request(REQUEST_OPTIONS, function(res) {
-            res.setEncoding('utf8');
-            var html = "";
-            res.on('data', function(chunk) {
-                    html = html + chunk;
-                })
-                .on('end', () => {
-                    parseResult(html, resolve);
-                });
+    return Util.queryNaver(REQUEST_OPTIONS)
+        .then((html) => {
+            return parseResult(html);
         });
-        req.end();
-    });
 }
 
 function serve(req, res) {
@@ -239,7 +188,11 @@ function serve(req, res) {
     lookUp(query, page)
         .then(result => {
             res.send(result);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).end();
         });
 }
 
-module.exports.route = serve;
+module.exports.serve = serve;

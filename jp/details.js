@@ -35,8 +35,9 @@ function serve(req, res) {
             res.send(response);
         })
         .catch(err => {
-            res.status(400).end();
+            console.log(err);
+            res.status(500).send({}).end();
         });
 }
 
-module.exports.route = serve;
+module.exports.serve = serve;

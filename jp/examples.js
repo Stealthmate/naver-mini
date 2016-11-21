@@ -11,21 +11,22 @@ const PAGE = "%PAGE%";
 
 const URL_TEMPLATE = "/search.nhn?range=example&q=%QUERY%&page=%PAGE%";
 
-const WHITESPACE = /[ \n\t]+/g;
-
 const WORDLINK = /\[([^\[\]]+)\]/g;
 
+let Util = require("../util.js");
+
 function parseKR($, container) {
-    return container.text().replace(WHITESPACE, " ").replace(WORDLINK, "").trim();
+    return Util.shrink(container.text()).replace(WORDLINK, "").trim();
 }
 
 function parseJP($, container) {
     let text = container.find("span").remove(".player, .pin").end();
-    text = require('./util.js').parseRuby(text, $).replace(WORDLINK, "").replace(WHITESPACE, " ").trim();
+    text = require('./jputil.js').parseRuby(text, $).replace(WORDLINK, "");
+    text = Util.shrink(text);
     return text;
 }
 
-function parseResult(html, resolve) {
+function parseResult(html) {
     let $ = require('cheerio').load(html);
 
     let examples = [];
@@ -34,7 +35,8 @@ function parseResult(html, resolve) {
         let exItem = $(exContainer[i]);
 
         let original = $(exItem.children("p")[0]);
-        let keyword = exItem.children("p").find(".pin a").text().replace(WHITESPACE, " ");
+        let keyword = exItem.children("p").find(".pin a").text();
+        keyword = Util.shrink(keyword);
         let translated = $(exItem.children("p")[1]);
 
         let from = "JP";
@@ -50,38 +52,23 @@ function parseResult(html, resolve) {
             to = "JP";
         }
 
-        examples.push({
-            ex: original,
-            tr: translated,
-            keyword: keyword,
-            from: from,
-            to: to
-        });
+        let TranslatedExample = require("../models/TranslatedExample.js");
+
+        examples.push(new TranslatedExample(from, to, keyword, original, translated));
     }
 
-    resolve(examples);
+    return examples;
 }
 
 function lookUp(query, page) {
-    return new Promise((resolve, reject) => {
-        let http = require('http');
+    if (!page || page < 1) page = 1;
 
-        if (!page || page < 1) page = 1;
+    REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
 
-        REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
-
-        let req = http.request(REQUEST_OPTIONS, function(res) {
-            res.setEncoding('utf8');
-            var html = "";
-            res.on('data', function(chunk) {
-                    html = html + chunk;
-                })
-                .on('end', () => {
-                    parseResult(html, resolve);
-                });
+    return Util.queryNaver(REQUEST_OPTIONS)
+        .then(html => {
+            return parseResult(html);
         });
-        req.end();
-    });
 }
 
 function serve(req, res) {
@@ -97,7 +84,11 @@ function serve(req, res) {
     lookUp(query, page)
         .then(result => {
             res.send(result);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send({}).end();
         });
 }
 
-module.exports.route = serve;
+module.exports.serve = serve;

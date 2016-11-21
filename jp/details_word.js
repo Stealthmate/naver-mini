@@ -1,25 +1,3 @@
-/*
-
-An example response looks like this:
-
-class: wordclass,
-mean: [
-    {
-        mean: meaning,
-        glosses: [
-            gloss: gloss,
-            ex: [
-                {
-                    ex: example,
-                    tr: translation,
-                }
-            ]
-        ]
-    }
-]
-
-*/
-
 const REQUEST_OPTIONS = {
     host: "jpdic.naver.com",
     port: 80,
@@ -27,9 +5,9 @@ const REQUEST_OPTIONS = {
     method: 'GET'
 };
 
-const WHITESPACE = /[ \n\t]+/g;
-
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
+
+const Util = require("../util.js");
 
 function parseRuby(el, $) {
 
@@ -45,24 +23,27 @@ function parseRuby(el, $) {
     return str;
 }
 
-function parseExamples(container, $) {
+function parseExamples(keyword, container, $) {
     let exampleContainers = $(container).children("p");
 
     let examples = [];
 
     for (let l = 0; l <= exampleContainers.length - 1; l++) {
+
         let exampleContainer = $(exampleContainers[l]).children("span").remove(".player, .ico_bl").end().children("span");
         let original = parseRuby($(exampleContainer[0]), $);
         let translation = parseRuby($(exampleContainer[1]), $);
-        //console.log(" - - - - " + original);
-        //console.log(" - - - - " + translation);
 
-        let exampleObj = {
-            ex: original,
-            tr: translation
-        };
-
-        examples.push(exampleObj);
+        let TranslatedExample = require("../models/TranslatedExample.js");
+        let from, to;
+        if($(exampleContainer[0]).attr("lang") === "jp") {
+            from = TranslatedExample.LANGS.JP;
+            to = TranslatedExample.LANGS.KR;
+        } else {
+            from = TranslatedExample.LANGS.KR;
+            to = TranslatedExample.LANGS.JP;
+        }
+        examples.push(new TranslatedExample(from, to, keyword, original, translation));
     }
 
     return examples;
@@ -70,6 +51,8 @@ function parseExamples(container, $) {
 
 function parseDetails(html) {
     let $ = require('cheerio').load(html);
+
+    let JpWordEntry = require("../models/JpWordEntry.js");
 
     let classSections = $(".section_article");
 
@@ -95,34 +78,19 @@ function parseDetails(html) {
                 let gloss = parseRuby($(glossContainers[k]).children(".lst_txt"), $);
                 //console.log(" - - - " + gloss);
 
-                let examples = parseExamples(glossContainers[k], $);
-                let glossObj = {
-                    g: gloss,
-                    ex: examples
-                };
-                glosses.push(glossObj);
+                let examples = parseExamples(word, glossContainers[k], $);
+                glosses.push(new JpWordEntry.JpGloss(gloss, examples));
             }
 
-            let examples = parseExamples(meaningContainers[j], $);
-
-            let meaningObj = {
-                glosses: [{
-                    g: meaning
-                }]
-            };
+            let examples = parseExamples(word, meaningContainers[j], $);
+            let meaningObj = new JpWordEntry.JpMeaning(null, [new JpWordEntry.JpGloss(meaning, examples)]);
             if (glosses.length > 0) {
-                meaningObj.m = meaning;
-                meaningObj.glosses = glosses;
+                meaningObj = new JpWordEntry.JpMeaning(meaning, glosses);
             }
-            if (examples && examples.length > 0) meaningObj.glosses[0].ex = examples;
             meanings.push(meaningObj);
         }
 
-        let wordclassObj = {
-            wclass: wordclass,
-            meanings: meanings
-        };
-        wordclasses.push(wordclassObj);
+        wordclasses.push(new JpWordEntry.JpWordClassGroup(wordclass, meanings));
     }
 
     let result = {};
@@ -134,27 +102,17 @@ function parseDetails(html) {
 }
 
 function serve(link, page, pagesize) {
-    return new Promise((resolve, reject) => {
+    REQUEST_OPTIONS.path = "/" + link;
 
-        let http = require('http');
-
-        REQUEST_OPTIONS.path = "/" + link;
-
-        let req = http.request(REQUEST_OPTIONS, function(res) {
-            res.setEncoding('utf8');
-            var html = "";
-            res.on('data', function(chunk) {
-                    html = html + chunk;
-                })
-                .on('end', () => {
-                    let resultObj = parseDetails(html);
-                    resultObj.partial = false;
-                    resultObj.more = link;
-                    resolve(resultObj);
-                });
+    return Util.queryNaver(REQUEST_OPTIONS)
+        .then((html) => {
+            let resultObj = parseDetails(html);
+            resultObj.partial = false;
+            resultObj.more = link;
+            let JpWordEntry = require("../models/JpWordEntry.js");
+            let result = new JpWordEntry(resultObj.word, resultObj.kanji, resultObj.clsgrps, false, link);
+            return result.getCompressed();
         });
-        req.end();
-    });
 }
 
 module.exports = serve;
