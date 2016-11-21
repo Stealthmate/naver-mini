@@ -1,3 +1,5 @@
+const EnWordEntry = require("../models/EnWordEntry.js");
+
 const REQUEST_OPTIONS = {
     host: "endic.naver.com",
     port: 80,
@@ -5,11 +7,11 @@ const REQUEST_OPTIONS = {
     method: 'GET'
 };
 
-const WHITESPACE = /[ \r\n\t]+/g;
-
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
-function parseDefs(container, $) {
+const Util = require("../util.js");
+
+function parseDefs($, container, keyword) {
 
     let dts = container.children("dt");
     let defsArr = [];
@@ -19,11 +21,10 @@ function parseDefs(container, $) {
         let defobj = {};
 
         let def = $(dts[j]).children("span").eq(0).remove().end();
-        let eng = def.find("i").eq(0).text().replace(WHITESPACE, " ").trim();
-        let mean = def.children("em").find(".fnt_intro").remove().end().find(".blind").remove().end().text().replace(WHITESPACE, " ").trim();
-
-        if (eng) defobj.enWord = eng;
-        defobj.m = mean;
+        let eng = def.find("i").eq(0).text();
+        eng = Util.shrink(eng);
+        let mean = def.children("em").find(".fnt_intro").remove().end().find(".blind").remove().end().text();
+        mean = Util.shrink(mean);
 
         let exarr = [];
 
@@ -33,17 +34,23 @@ function parseDefs(container, $) {
             let exobj = {};
 
             let dd = $(examples[k]);
-            let ex = dd.children("p").eq(0).text().replace(WHITESPACE, " ").trim();
-            let translated = dd.children("p").eq(1).text().replace(WHITESPACE, " ").trim();
+            let ex = dd.children("p").eq(0).text();
+            ex = Util.shrink(ex);
+            let translated = dd.children("p").eq(1).text();
+            translated = Util.shrink(translated);
 
-            exobj.ex = ex;
-            exobj.tr = translated;
+            let from = EnWordEntry.TranslatedExample.KR;
+            let to = EnWordEntry.TranslatedExample.EN;
 
-            exarr.push(exobj);
+            if(dd.children("p").eq(0).attr("lang") === "en") {
+                from = EnWordEntry.TranslatedExample.EN;
+                to = EnWordEntry.TranslatedExample.KR;
+            }
+
+            exarr.push(new EnWordEntry.TranslatedExample(from, to, keyword, ex, translated));
         }
-        if (exarr.length > 0) defobj.ex = exarr;
 
-        defsArr.push(defobj);
+        defsArr.push(new EnWordEntry.EnMeaning(mean, eng, exarr));
     }
 
     return defsArr;
@@ -55,16 +62,22 @@ function parseDetailsFromKr(html) {
     let resultObj = {};
 
     let title = $("#content .word_view");
-    let word = title.find(".tit strong").text().trim().replace(WHITESPACE, " ");
+    let word = title.find(".tit strong").text();
+    word = Util.shrink(word);
     resultObj.word = word;
 
-    let hanja = title.find(".tit span").children().remove().end().text().replace(WHITESPACE, " ").trim();
+    let hanja = title.find(".tit span").children().remove().end().text();
+    hanja = Util.shrink(hanja);
     if (hanja) resultObj.extra = hanja;
 
     resultObj.clsgrps = [];
-    resultObj.clsgrps.push({});
-    resultObj.clsgrps[0].wclass = "";
-    resultObj.clsgrps[0].meanings = parseDefs($("#zoom_content").children("div").children("dl.list_a11"), $);
+    resultObj.clsgrps.push(
+        new EnWordEntry.EnWordClassGroup(
+            null,
+            parseDefs(
+                $,
+                $("#zoom_content").children("div").children("dl.list_a11"),
+                word)));
 
     return resultObj;
 }
@@ -83,10 +96,12 @@ function parseDetailsFromEn(html) {
 
     let title = $("#content .word_view");
 
-    let word = title.find(".tit h3").text().trim().replace(WHITESPACE, " ");
+    let word = title.find(".tit h3").text();
+    word = Util.shrink(word);
     resultObj.word = word;
 
-    let pronun = title.find(".pron em").children().eq(0).text().replace(WHITESPACE, " ").trim();
+    let pronun = title.find(".pron em").children().eq(0).text();
+    pronun = Util.shrink(pronun);
     if (pronun) resultObj.pronun = pronun;
 
     resultObj.clsgrps = [];
@@ -95,52 +110,35 @@ function parseDetailsFromEn(html) {
 
     for (let i = 0; i <= wclassSections.length - 1; i++) {
         let content = $(wclassSections[i]);
-
-        let wclassDefArr = {};
-
-        let wordclass = content.find("h3").text();
-        wclassDefArr.wclass = wordclass;
-
-        let dl = content.find("dl");
-
-        wclassDefArr.meanings = parseDefs(dl, $);
-        resultObj.clsgrps.push(wclassDefArr);
+        resultObj.clsgrps.push(new EnWordEntry.EnWordClassGroup(content.find("h3").text(), parseDefs($, content.find("dl"), word)));
     }
 
     return resultObj;
 }
 
 function lookUp(link) {
-    return new Promise((resolve, reject) => {
+    let http = require('http');
 
-        let http = require('http');
+    REQUEST_OPTIONS.path = "/" + link;
 
-        REQUEST_OPTIONS.path = "/" + link;
+    return Util.queryNaver(REQUEST_OPTIONS)
+        .then(html => {
+            let result = null;
+            if (link.indexOf("en") == 0) {
+                if (link.indexOf("Idiom") < 0) result = parseDetailsFromEn(html);
+                else result = parseDetailsFromEnIdiom(html);
+            } else result = parseDetailsFromKr(html);
 
-        let req = http.request(REQUEST_OPTIONS, function(res) {
-            res.setEncoding('utf8');
-            let html = "";
-            res.on('data', function(chunk) {
-                    html = html + chunk;
-                })
-                .on('end', () => {
-                    let result = null;
-                    if (link.indexOf("en") == 0) {
-                        if(link.indexOf("Idiom") < 0) result = parseDetailsFromEn(html);
-                        else result = parseDetailsFromEnIdiom(html);
-                    }
-                    else result = parseDetailsFromKr(html);
-
-                    //hack for endic links
-                    result.more = link.substring(0, link.indexOf("&sLn="));
-                    result.partial = false;
-                    resolve(result);
-                });
+            return new EnWordEntry(
+                result.word,
+                result.pronun,
+                result.hanja,
+                result.clsgrps,
+                false,
+                link.replace(/&?sLn=[^&]*&?/, "")
+            ).getCompressed();
         });
-        req.end();
-    })
 }
-const heapdump = require('heapdump');
 
 function serve(req, res) {
 
@@ -172,8 +170,8 @@ function serve(req, res) {
             res.send(response);
         })
         .catch(err => {
-            res.status(400).end();
+            res.status(500).send({}).end();
         });
 }
 
-module.exports.route = serve;
+module.exports.serve = serve;

@@ -1,3 +1,5 @@
+const TranslatedExample = require("../models/TranslatedExample.js");
+
 const REQUEST_OPTIONS = {
     host: "endic.naver.com",
     port: 80,
@@ -11,11 +13,11 @@ const PAGE = "%PAGE%";
 
 const URL_TEMPLATE = "/search_example.nhn?sLn=en&query=" + QUERY + "&pageNo=" + PAGE;
 
-const WHITESPACE = /[ \n\t]+/g;
-
 const WORDLINK = /\[([^\[\]]+)\]/g;
 
-function parseResult(html, resolve) {
+const Util = require("../util.js");
+
+function parseResult(html) {
     let $ = require('cheerio').load(html);
 
     let examples = [];
@@ -23,46 +25,34 @@ function parseResult(html, resolve) {
     for (let i = 0; i <= exContainer.length - 1; i++) {
         let exItem = $(exContainer[i]);
 
-        let keyword = exItem.children("div").eq(0).children("span").eq(1).find("b").eq(0).text().replace(WHITESPACE, " ");
+        let keyword = exItem.children("div").eq(0).children("span").eq(1).find("b").eq(0).text();
+        keyword = Util.shrink(keyword);
 
-        let original = exItem.children("div").eq(0).children("span").eq(1).text().replace(WHITESPACE, " ");
-        let translated = $(exItem.children("div")[1]).text().replace(WHITESPACE, " ");
+        let original = exItem.children("div").eq(0).children("span").eq(1).text();
+        original = Util.shrink(original);
+        let translated = $(exItem.children("div")[1]).text();
+        translated = Util.shrink(translated);
 
-        let from = "EN";
-        let to = "KR";
+        let from = TranslatedExample.LANGS.EN;
+        let to = TranslatedExample.LANGS.KR;
 
-        examples.push({
-            ex: original,
-            tr: translated,
-            keyword: keyword,
-            from: from,
-            to: to
-        });
+        examples.push(new TranslatedExample(from, to, keyword, original, translated).getCompressed());
     }
 
-    resolve(examples);
+    return examples;
 }
 
 function lookUp(query, page) {
-    return new Promise((resolve, reject) => {
-        let http = require('http');
+    let http = require('http');
 
-        if (!page || page < 1) page = 1;
+    if (!page || page < 1) page = 1;
 
-        REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
+    REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
 
-        let req = http.request(REQUEST_OPTIONS, function(res) {
-            res.setEncoding('utf8');
-            var html = "";
-            res.on('data', function(chunk) {
-                    html = html + chunk;
-                })
-                .on('end', () => {
-                    parseResult(html, resolve);
-                });
-        });
-        req.end();
-    });
+    return Util.queryNaver(REQUEST_OPTIONS)
+        .then(html => {
+            return parseResult(html);
+        })
 }
 
 function serve(req, res) {
@@ -78,7 +68,11 @@ function serve(req, res) {
     lookUp(query, page)
         .then(result => {
             res.send(result);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send({}).end();
         });
 }
 
-module.exports.route = serve;
+module.exports.serve = serve;
