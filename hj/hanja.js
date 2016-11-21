@@ -1,3 +1,5 @@
+const HanjaEntry = require("../models/HanjaEntry.js");
+
 const QUERY = "%QUERY%";
 const PAGE = "%PAGE%";
 
@@ -10,9 +12,9 @@ const REQUEST_OPTIONS = {
     method: 'GET'
 };
 
-const WHITESPACE = /[ \n\t]+/g;
-
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
+
+const Util = require("../util.js");
 
 function parseDefinitionHeader(header, $) {
     let headerobj = {};
@@ -41,26 +43,48 @@ function parseHanja(sec, $) {
 
     for (let i = 0; i <= hanjas.length - 1; i++) {
 
-        let hanja = $(hanjas[i]).text().replace(WHITESPACE, " ");
-	let hjdef = $(hanjadefs[i]);
+        let hanja = $(hanjas[i]).text();
+        hanja = Util.shrink(hanja);
+        let hjdef = $(hanjadefs[i]);
 
-	let namelink = hjdef.children("a").eq(0).text().replace(WHITESPACE, " ");
+        let readings = hjdef.children("a").eq(0).text();
+        readings = Util.shrink(readings).split(" ");
 
-	let meaning = hjdef.children(".meaning").text().replace(WHITESPACE, " ");
-    let meanings = meaning.split(/[0-9]\. /).slice(1);
+        let meaning = hjdef.children(".meaning").text();
+        meaning = Util.shrink(meaning);
+        let meanings = meaning.split(/[0-9]\. /).slice(1);
 
-	let radical = hjdef.children(".sub_info").find("li").eq(0).find("span").text().replace(WHITESPACE, " ");
-	let strokes = hjdef.children(".sub_info").find("li").eq(1).children().remove().end().text().replace(WHITESPACE, " ");
-	strokes = parseInt(strokes.substring(0, strokes.length-1));
-	let difficulty = hjdef.children(".sub_info").find("li").eq(2).children().remove().end().text().replace(WHITESPACE, " ");
-	hjlist.push({
-		hanja: hanja,
-		meaning: meanings,
-		name: namelink,
-		radical: radical,
-		strokes: strokes,
-		difficulty: difficulty
-	});
+        let radical = hjdef.children(".sub_info").find("li").eq(0).find("span").text();
+        radical = Util.shrink(radical);
+        let strokes = hjdef.children(".sub_info").find("li").eq(1).children().remove().end().text();
+        strokes = parseInt(Util.shrink(strokes).substring(0, strokes.length - 1));
+        let difficulty = hjdef.children(".sub_info").find("li").eq(2).children().remove().end().text();
+        difficulty = Util.shrink(difficulty);
+
+        hjlist.push(new HanjaEntry(
+            hanja,
+            readings,
+            radical,
+            strokes,
+            null,
+            difficulty,
+            meanings,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            true
+        ).getCompressed());
+        /*hjlist.push({
+        	hanja: hanja,
+        	meaning: meanings,
+        	name: readings,
+        	radical: radical,
+        	strokes: strokes,
+        	difficulty: difficulty
+        });*/
     }
 
     return hjlist;
@@ -75,27 +99,15 @@ function parseResult(html) {
 }
 
 function lookUp(query, page) {
-    return new Promise((resolve, reject) => {
-        let http = require('http');
+    let http = require('http');
 
-        if (page < 1) page = 1;
+    if (page < 1) page = 1;
 
-        REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
-        let reqtime = Date.now();
-        let req = http.request(REQUEST_OPTIONS, function(res) {
-            res.setEncoding('utf8');
-            var html = "";
-            res.on('data', function(chunk) {
-                    html = html + chunk;
-                })
-                .on('end', () => {
-                    let restime = (Date.now() - reqtime)/1000;
-                    if(restime > 1) console.log("Response from naver " + restime);
-                    resolve(parseResult(html));
-                });
+    REQUEST_OPTIONS.path = URL_TEMPLATE.replace(PAGE, page).replace(QUERY, encodeURIComponent(query));
+    return Util.queryNaver(REQUEST_OPTIONS)
+        .then(html => {
+            return parseResult(html);
         });
-        req.end();
-    });
 }
 
 function serve(req, res) {
@@ -110,6 +122,10 @@ function serve(req, res) {
     lookUp(query, page)
         .then(result => {
             res.send(result);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send({}).end();
         });
 }
 

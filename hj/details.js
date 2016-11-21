@@ -1,3 +1,5 @@
+const HanjaEntry = require("../models/HanjaEntry.js");
+
 const REQUEST_OPTIONS = {
     host: "hanja.naver.com",
     port: 80,
@@ -14,8 +16,6 @@ const MARK_RADICAL = "부수";
 
 const DELIM_YOMI = "·";
 
-const WHITESPACE = /[ \n\t]+/g;
-
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
 const MARK_HIERO_EXPL = "상형문자";
@@ -26,6 +26,8 @@ const MARK_REL_HANJA_MEAN = "같은 뜻을 가진 한자(유의자)";
 const MARK_REL_HANJA_OPP = "반대 뜻을 가진 한자(상대자)";
 const MARK_REL_WORDS = "관련 단어";
 const MARK_REL_IDIOMS = "관련 고사성어";
+
+const Util = require("../util.js");
 
 function parseMoreInfo(link) {
     let str = link;
@@ -50,40 +52,45 @@ function parseDetails(html) {
 
     let misc = top.find("dd").children().remove("a").end();
 
-    let readings = misc.children("strong").text().replace(WHITESPACE, " ").split(" ");
+    let readings = Util.shrink(misc.children("strong").text()).split(" ");
 
     let miscinfo = misc.find("ul > li");
     let radical = miscinfo.eq(0).find("span.hanja").text();
     let strokes = miscinfo.eq(1).find("span.num").text();
     let saseongeum = miscinfo.eq(2).find("span.sound").text().split(", ");
-    let difficulty = miscinfo.eq(3).children().remove("em").end().text().replace(WHITESPACE, " ");
+    let difficulty = miscinfo.eq(3).children().remove("em").end().text();
+    difficulty = Util.shrink(difficulty);
 
     let meaningsDOM = content.find(".kinds_list > ul").eq(0).children("li");
     let meanings = [];
     for (let i = 0; i <= meaningsDOM.length - 1; i++) {
         let text = meaningsDOM.eq(i).text();
-        text = text.substring(text.indexOf(".") + 2).replace(WHITESPACE, " ").trim();
+        text = text.substring(text.indexOf(".") + 2);
+        text = Util.shrink(text);
         meanings.push(text);
     }
 
     let explanationsDOM = content.find(".kinds_list > ul.lines > li");
     let explanations = [];
     for (let i = 0; i <= explanationsDOM.length - 1; i++) {
-        let text = explanationsDOM.eq(i).text().replace(WHITESPACE, " ").trim();
+        let text = explanationsDOM.eq(i).text();
+        text = Util.shrink(text);
         explanations.push(text);
     }
 
 
 
-    let hieroExpl = undefined;
+    let glyphExpl = undefined;
     let relHanja = {};
 
     let subsects = content.find(".word_txt");
 
     for (let i = 0; i <= subsects.length - 1; i++) {
-        let heading = subsects.eq(i).find("h5").text().replace(WHITESPACE, " ").trim();
+        let heading = subsects.eq(i).find("h5").text();
+        heading = Util.shrink(heading);
         if (heading === MARK_HIERO_EXPL) {
-            hieroExpl = subsects.eq(i).children("p").text().replace(WHITESPACE, " ").trim();
+            glyphExpl = subsects.eq(i).children("p").text();
+            glyphExpl = Util.shrink(glyphExpl);
         } else if (heading == MARK_RELATED_HANJA) {
             let listnames = subsects.eq(i).find("p.blue");
             let lists = subsects.eq(i).find("ul");
@@ -116,36 +123,30 @@ function parseDetails(html) {
 
     let relwordDOM = content.find(".word_list");
     for (let i = 0; i <= relwordDOM.length - 1; i++) {
-        let heading = relwordDOM.eq(i).find("h5").text().replace(WHITESPACE, " ").trim();
+        let heading = relwordDOM.eq(i).find("h5").text();
+        heading = Util.shrink(heading);
         if (heading.indexOf(MARK_REL_WORDS) > -1) {
             let defs = relwordDOM.eq(i).find("dl > dt");
             for (let j = 0; j <= defs.length - 1; j++) {
                 let hj = defs.eq(i).text().trim();
                 let hg = defs.eq(i).nextUntil("dt").eq(0).text().trim();
-                relWords.push({
-                    hj: hj,
-                    hg: hg
-                });
+                relWords.push(new HanjaEntry.HanjaWord(hj, hg));
             }
         } else if (heading.indexOf(MARK_REL_IDIOMS) > -1) {
             let defs = relwordDOM.eq(i).find("dl > dt");
             for (let j = 0; j <= defs.length - 1; j++) {
                 let hj = defs.eq(i).text().trim();
                 let hg = defs.eq(i).nextUntil("dt").eq(0).text().trim();
-                relIdioms.push({
-                    hj: hj,
-                    hg: hg
-                });
+                relIdioms.push(new HanjaEntry.HanjaWord(hj, hg));
             }
         }
     }
-
 
     let detailsObj = {
         hanja: hanja,
         readings: readings,
         radical: radical,
-        strokes: strokes,
+        strokes: parseInt(strokes),
         saseongeum: saseongeum,
         diff: difficulty,
         mean: meanings,
@@ -155,29 +156,37 @@ function parseDetails(html) {
         relWords: relWords,
         relIdioms: relIdioms
     };
-    if (hieroExpl) detailsObj.hieroexpl = hieroExpl;
+    if (glyphExpl) detailsObj.glyphExpl = glyphExpl;
 
     return detailsObj;
 
 }
 
 function lookUp(query) {
-    return new Promise((resolve, reject) => {
-        let http = require('http');
+    let http = require('http');
 
-        REQUEST_OPTIONS.path = URL_TEMPLATE.replace(QUERY, encodeURIComponent(query));
-        let req = http.request(REQUEST_OPTIONS, function(res) {
-            res.setEncoding('utf8');
-            var html = "";
-            res.on('data', function(chunk) {
-                    html = html + chunk;
-                })
-                .on('end', () => {
-                    resolve(parseDetails(html));
-                });
+    REQUEST_OPTIONS.path = URL_TEMPLATE.replace(QUERY, encodeURIComponent(query));
+    return Util.queryNaver(REQUEST_OPTIONS)
+        .then(html => {
+            let result = parseDetails(html);
+
+            return new HanjaEntry(
+                result.hanja,
+                result.readings,
+                result.radical,
+                result.strokes,
+                result.saseongeum,
+                result.diff,
+                result.mean,
+                result.expl,
+                result.glyphExpl,
+                result.relHanja,
+                result.strokeDiagram,
+                result.relWords,
+                result.relIdioms,
+                false
+            ).getCompressed();
         });
-        req.end();
-    });
 }
 
 function serve(req, res) {
@@ -192,6 +201,10 @@ function serve(req, res) {
     lookUp(query, page)
         .then(result => {
             res.send(result);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send({}).end();
         });
 }
 
