@@ -1,3 +1,5 @@
+const KrWordEntry = require("../models/KrWordEntry.js");
+
 const REQUEST_OPTIONS = {
     host: "krdic.naver.com",
     port: 80,
@@ -6,24 +8,26 @@ const REQUEST_OPTIONS = {
     agent: false
 };
 
-const WHITESPACE = /[ \n\t]+/g;
-
-const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
-
 const MARK_PRONUN = "발음";
+
+const Util = require("../util.js");
 
 function parseDetails(html) {
     let $ = require('cheerio').load(html);
 
     let titleArea = $(".spot_area#wordArea h3");
 
-    let hanja = titleArea.find(".cha").text().trim().replace(WHITESPACE, " ");
-    let pronun = titleArea.children("em:contains('" + MARK_PRONUN + "')").text().replace(WHITESPACE, " ").trim();
+    let hanja = titleArea.find(".cha").text();
+    hanja = Util.shrink(hanja);
+    let pronun = titleArea.children("em:contains('" + MARK_PRONUN + "')").text();
+    pronun = Util.shrink(pronun);
     pronun = pronun.substring(pronun.indexOf(": ") + 2, pronun.length - 1);
 
-    let word = titleArea.children().remove().end().text().trim().replace(WHITESPACE, " ");
+    let word = titleArea.children().remove().end().text();
+    word = Util.shrink(word);
 
-    let wordclass = $("#meanArea h4").text().trim().replace(WHITESPACE, " ");
+    let wordclass = $("#meanArea h4").text();
+    wordclass = Util.shrink(wordclass)
 
     let glosses = $("dl.lst > dt");
     let examplelists = $("dl.lst > dd");
@@ -32,14 +36,15 @@ function parseDetails(html) {
 
     for (let i = 0; i <= glosses.length - 1; i++) {
         let glossobj = {};
-        glossobj.def = $(glosses[i]).find(".title").children("strong").text().replace(WHITESPACE, " ");
+        glossobj.def = $(glosses[i]).find(".title").children("strong").text();
+        glossobj.def = Util.shrink(glossobj.def);
         glossobj.ex = [];
         let exlist = $(examplelists[i]).find(".lst_mean > li");
         for (let j = 0; j <= exlist.length - 1; j++) {
-            glossobj.ex[j] = $(exlist[j]).children().remove("span").end().text().trim().replace(WHITESPACE, " ");
+            glossobj.ex[j] = Util.shrink($(exlist[j]).children().remove("span").end().text());
         }
 
-        glossesobjs.push(glossobj);
+        glossesobjs.push(new KrWordEntry.KrDefinition(glossobj.def, glossobj.ex));
     }
 
     if (glosses.length == 0) {
@@ -52,10 +57,10 @@ function parseDetails(html) {
 
         let exlist = $("#meanArea > ul.lst_mean > li");
         for (let j = 0; j <= exlist.length - 1; j++) {
-            glossobj.ex[j] = $(exlist[j]).text().trim().replace(WHITESPACE, " ");
+            glossobj.ex[j] = Util.shrink($(exlist[j]).text());
         }
 
-        glossesobjs.push(glossobj)
+        glossesobjs.push(new KrWordEntry.KrDefinition(glossobj.def, glossobj.ex));
     }
 
     let resultobj = {};
@@ -72,29 +77,26 @@ function parseDetails(html) {
 }
 
 function lookUp(link) {
-    return new Promise((resolve, reject) => {
+    let http = require('http');
 
-        let http = require('http');
+    REQUEST_OPTIONS.path = "/" + link;
 
-        REQUEST_OPTIONS.path = "/" + link;
-
-        let req = http.request(REQUEST_OPTIONS, function(res) {
-            res.setEncoding('utf8');
-            let html = "";
-            res.on('data', function(chunk) {
-                    html = html + chunk;
-                })
-                .on('end', () => {
-                    let resultObj = parseDetails(html);
-                    resultObj.more = link;
-                    resultObj.partial = false;
-                    resolve(resultObj);
-                });
+    return Util.queryNaver(REQUEST_OPTIONS)
+        .then((html) => {
+            let resultObj = parseDetails(html);
+            resultObj.more = link;
+            resultObj.partial = false;
+            return new KrWordEntry(
+                resultObj.word,
+                resultObj.hanja,
+                resultObj.pronun,
+                resultObj.wclass,
+                resultObj.defs,
+                false,
+                link
+            ).getCompressed();
         });
-        req.end();
-    })
 }
-const heapdump = require('heapdump');
 
 function serve(req, res) {
 
@@ -106,7 +108,6 @@ function serve(req, res) {
 
     lookUp(link)
         .then(result => {
-
             let response = result;
 
             if (page >= 0) {
@@ -123,6 +124,7 @@ function serve(req, res) {
                     response = result.slice(start, result.length);
                 }
             }
+
             res.send(response);
         })
         .catch(err => {
@@ -130,4 +132,4 @@ function serve(req, res) {
         });
 }
 
-module.exports.route = serve;
+module.exports.serve = serve;
