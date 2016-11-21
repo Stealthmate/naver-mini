@@ -1,0 +1,9 @@
+<section id="<%= schema.title.match(/[a-zA-Z0-9]+/g).join('') %>" class="schema">
+    <h2 class="schemaName"><%= schema.title %></h2>
+
+    <% if(schema.type === "object") {
+        let obj = schema; %>
+        <% include template_obj.ejs %>
+    <% } %>
+
+</section>

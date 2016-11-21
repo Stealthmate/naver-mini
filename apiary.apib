@@ -5,33 +5,62 @@ HOST: https://naver-mini-dev.herokuapp.com
 
 An API which pulls dictionary data from Naver's dictionaries as compressed JSON.
 
-## Korean Dictionary [/kr{?q}]
+# Group Korean Dictionary
 
-### Query dictionary [GET]
+## Korean Word Dictionary [GET /kr/words{?q}]
 
 + Parameters
-    + q - a query string to search for
+    + q: `남자` (string, required) - a query string to search for
 
 + Response 200 (application/json)
 
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
-                    }
-                ]
-            }
-        ]
+    + Body
+
+            [{"word":"남자","defs":[{"def":"남성(男性)으로 태어난 사람."}],"hanja":"男子","wclass":"명사","more":"/detail.nhn?docid=6994400","partial":true},{"word":"남자","defs":[{"def":"‘국자1’의 방언(제주)."}],"wclass":"명사;방언","more":"/detail.nhn?docid=6994300","partial":false},{"word":"귀남자","defs":[{"def":"용모나 풍채가 뛰어나고 잘생긴 남자."}],"hanja":"貴男子","pronun":"[귀ː남자]","wclass":"명사","more":"/detail.nhn?docid=4869500","partial":true}]
+
+    + Schema
+
+            See word details
+
+
+## Get details for word [GET /kr/details{?lnk}]
+
++ Parameters
+    + lnk: `/detail.nhn?docid=6994400` - a sublink to a Naver krdic word entry
+
++ Response 200 (application/json)
+
+    + Body
+
+                {"word":"남자","hanja":"男子","wclass":"명사","defs":[{"def":"남성(男性)으로 태어난 사람. [비슷한 말] 남2(男).","ex":["남자 친구","남자 탈의실","남자 화장실 예문보기","한 젊은 남자가 가게 문을 밀고 들어왔다.","그 처자 사람 부리는 휫손이 웬만한 남자 뺨치겠습니다.","여자는 유리잔을 쥐고서 남자 앞에서 담배를 피울 것인지 아닌지 망설이고 있었다.","남자 아이","새 시대에는 여성들도 남자 못지 않게 나라를 위해 할 일이 많단다.","여자들은 잘생긴 남자를 좋아하는 법이다.","역시 줄을 당기자 종소리가 들리고 주인 남자가 언제나 그랬듯이 반쯤 잠이 깬 모습으로 홀 쪽으로 나왔다."]},{"def":"사내다운 사내.","ex":["그분이야 남자 중에 남자였지.","오랜만에 남자다운 남자를 만나게 돼서 기쁘옵니다.","군대를 갔다 오니 이제야 남자가 된 기분이다. 예문보기","영산포를 떠날까 하다가, 그렇게 되면 진짜 남자가 아닐 것 같기에 그냥 남기로 했구먼!"]},{"def":"한 여자의 남편이나 애인을 이르는 말.","ex":["그녀는 아직 남자가 없다.","너도 이제 좋은 남자 만나서 아들딸 낳고 잘 살아야지.","그 여자는 남자 관계가 복잡하다. 예문보기","그리고 이제는 머나먼 월남 땅으로 남자를 보내 놓고 외롭게 기다리는 여자들도 전쟁의 고통을 겪는다.","또 젊은 여자가, 그도 처녀도 아니요, 남의 아내가 왜 남의 시비들을 남자 교제를 하느냐 말이다.","범인을 찾는 것은 불가능하다. 경찰은 우선 여자의 남자 관계를 캐고 들 것이다.","아니 그럼. 자식 낳고 기르는 년이 남자 몰랐다면 거짓말이지."]}],"more":"detail.nhn?docid=6994400","partial":false}
+
+    + Schema
+
+            {"$schema":"http://json-schema.org/draft-04/schema","type":"array","items":[{"type":"object","properties":{"word":{"type":"string"},"hanja":{"type":"string"},"wclass":{"type":"string"},"partial":{"type":"boolean"},"more":{"type":"string"},"defs":{"type":"array","items":[{"type":"object","properties":{"def":{"type":"string"},"ex":{"type":"array","items":[{"type":"string"}]}}}]}}}]}
+
+
+
+
+## Get examples [GET /kr/ex{?q}]
+
++ Parameters
+    + q: `남자`
+
++ Response 200 (application/json)
+
+    + Body
+
+            [{"ex":"남자 친구","keyword":"남자","from":"KR","to":"KR"},{"ex":"남자 탈의실","keyword":"남자","from":"KR","to":"KR"},{"ex":"남자 화장실","keyword":"남자","from":"KR","to":"KR"},{"ex":"한 젊은 남자가 가게 문을 밀고 들어왔다.","keyword":"남+자","from":"KR","to":"KR"},{"ex":"그 처자 사람 부리는 휫손이 웬만한 남자 뺨치겠습니다. 출처 : 송기숙, 녹두 장군","keyword":"남자","from":"KR","to":"KR"},{"ex":"여자는 유리잔을 쥐고서 남자 앞에서 담배를 피울 것인지 아닌지 망설이고 있었다. 출처 : 박영한, 머나먼 송바 강","keyword":"남자","from":"KR","to":"KR"},{"ex":"남자 아이","keyword":"남자","from":"KR","to":"KR"},{"ex":"새 시대에는 여성들도 남자 못지 않게 나라를 위해 할 일이 많단다.","keyword":"남자","from":"KR","to":"KR"},{"ex":"여자들은 잘생긴 남자를 좋아하는 법이다.","keyword":"남자","from":"KR","to":"KR"},{"ex":"역시 줄을 당기자 종소리가 들리고 주인 남자가 언제나 그랬듯이 반쯤 잠이 깬 모습으로 홀 쪽으로 나왔다.","keyword":"남자","from":"KR","to":"KR"}]
+
+# Group Schemas
+
+## Korean Word Entry [GET /kr/words]
+
++ Response 200 (application/json)
+    + Body
+            {"type":"object","properties":{"word":{"type":"string"},"hanja":{"type":"string"},"wclass":{"type":"string"},"partial":{"type":"boolean"},"more":{"type":"string"},"defs":{"type":"string","items":[{"type":"object","properties":{"def":{"type":"string"},"ex":{"type":"array","items":[{"type":"string"}]}}}]}}}
+
+## Korean Example Entry [GET /kr/ex]
+
++ Response 200 (application/json)
+    + Body

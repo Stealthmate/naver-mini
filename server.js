@@ -28,9 +28,7 @@ app.use(compression());
 
 //Bindings for website view
 {
-
-
-    const viewfolder = './view/';
+    const viewfolder = './views/';
 
 
     app.get("/", (req, res) => {
@@ -52,6 +50,35 @@ app.use(compression());
     })
 }
 
+//Bindings for docs
+{
+    app.get("/doc", (req, res) => {
+        require("fs").readFile("apiary.apib", {encoding: "utf8"}, (err, data) => {
+            var blueprint = data;
+            var options = {
+              themeVariables: 'default'
+            };
+            let aglio = require("aglio");
+            aglio.render(blueprint, options, function (err, html, warnings) {
+                if (err) return console.log(err);
+                let keys = Object.keys(warnings);
+                if (keys.length !== 1 || keys[0] !== "input") console.log("WARNING", warnings);
+
+                res.send(html).end();
+            });
+        })
+    });
+
+    app.set("view-engine", "ejs");
+
+    app.get("/doc/schemas", (req, res) => {
+        require("./docs/jsonschemas").reload();
+        let schemas = require("./docs/jsonschemas").schemas;
+        let test = require("./jsonschemarenderer.js").render(schemas[0]);
+        res.render("docs/schemas.ejs", {schemas: schemas, test: test});
+    });
+}
+
 //Bindings for new API on default URI
 {
     let paths = {
@@ -63,14 +90,13 @@ app.use(compression());
     app.get("/kr", paths.kr.words);
     app.get("/kr/details", paths.kr.details);
     app.get("/kr/ex", paths.kr.examples)
-
     app.get("/jp", paths.jp.words);
     app.get("/jp/details", paths.jp.details);
     app.get("/jp/ex", paths.jp.examples);
 
     app.get("/en", paths.en.words);
     app.get("/en/details", paths.en.details);
-    app.get("/en/ex", paths.en.details);
+    app.get("/en/ex", paths.en.examples);
 
     app.get("/hj", paths.hj.hanja);
     app.get("/hj/details", paths.hj.details);
