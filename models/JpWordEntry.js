@@ -1,5 +1,5 @@
 const TranslatedExample = require("./TranslatedExample.js");
-const Util = require("../Util.js");
+const Util = require("../util.js");
 
 class JpGloss {
     constructor(g, ex) {
