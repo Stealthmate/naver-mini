@@ -77,14 +77,6 @@ function parseHanja(sec, $) {
             null,
             true
         ).getCompressed());
-        /*hjlist.push({
-        	hanja: hanja,
-        	meaning: meanings,
-        	name: readings,
-        	radical: radical,
-        	strokes: strokes,
-        	difficulty: difficulty
-        });*/
     }
 
     return hjlist;
