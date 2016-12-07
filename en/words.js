@@ -70,8 +70,10 @@ function parseDefinitions(items, $) {
         let enWord = meaning.substring(0, meaning.indexOf("|"));
         if (enWord) meaning = meaning.replace(enWord + "|", "").trim();
 
-
         if (more.charAt(0) == "/") more = more.substring(1);
+        if(more.indexOf("userEntry") >= 0) {
+            more = "http://endic.naver.com/" + more;
+        }
 
         if (meaning.length > 0) {
             deflist.push(new EnWordEntry(
