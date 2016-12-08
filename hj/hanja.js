@@ -75,6 +75,7 @@ function parseHanja(sec, $) {
             null,
             null,
             null,
+            null,
             true
         ).getCompressed());
     }

@@ -25,6 +25,7 @@ class HanjaEntry {
         meanings,
         expl,
         glyphexpl,
+        reference,
         relHanja,
         strokeDiagram,
         relWords,
@@ -60,6 +61,10 @@ class HanjaEntry {
         if (!glyphexpl) glyphexpl = "";
         Util.ensureType(glyphexpl, Util.types.string);
         this.glyphexpl = glyphexpl;
+
+        if (!reference) reference = "";
+        Util.ensureType(reference, Util.types.string);
+        this.reference = reference;
 
         if (!relHanja) relHanja = {};
         Util.ensureType(relHanja, Util.types.object);
@@ -103,6 +108,7 @@ class HanjaEntry {
         };
 
         if (this.saseongeum.length > 0) compressed.saseongeum = this.saseongeum;
+        if (this.reference.length > 0) compressed.reference = this.reference;
         if (this.glyphexpl.length > 0) compressed.glyphexpl = this.glyphexpl;
         if (this.readings.length > 0) compressed.readings = this.readings;
         if (this.meanings.length > 0) compressed.meanings = this.meanings;

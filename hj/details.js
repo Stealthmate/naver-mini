@@ -19,6 +19,7 @@ const DELIM_YOMI = "·";
 const WORDCLASS = /(^|\n)\[[^\[\]]+\]/g;
 
 const MARK_HIERO_EXPL = "상형문자";
+const MARK_REFERENCE = "참고정보";
 const MARK_RELATED_HANJA = "관련 한자";
 
 const MARK_REL_HANJA_SHAPE = "이형동의자(이체자)";
@@ -81,6 +82,7 @@ function parseDetails(html) {
 
 
     let glyphExpl = undefined;
+    let reference = undefined;
     let relHanja = {};
 
     let subsects = content.find(".word_txt");
@@ -91,13 +93,24 @@ function parseDetails(html) {
         if (heading === MARK_HIERO_EXPL) {
             glyphExpl = subsects.eq(i).children("p").text();
             glyphExpl = Util.shrink(glyphExpl);
+
+        } else if(heading == MARK_REFERENCE) {
+            reference = subsects.eq(i).children("p").text();
+            reference = Util.shrink(reference);
         } else if (heading == MARK_RELATED_HANJA) {
             let listnames = subsects.eq(i).find("p.blue");
             let lists = subsects.eq(i).find("ul");
 
             for (let j = 0; j <= lists.length - 1; j++) {
                 let lnm = listnames.eq(j).text();
-                let hanjalist = lists.eq(j).find("li a em").text().split("");
+                let hanjalist = lists.eq(j).find("li a em, li a span").text();
+                if (hanjalist.indexOf(")") > -1) {
+                    hanjalist = hanjalist.split(")");
+                    hanjalist = hanjalist.slice(0, hanjalist.length - 1);
+                    hanjalist.forEach((e, index) => {
+                        hanjalist[index] = e.replace("(", " (") + ")";
+                    })
+                } else hanjalist = hanjalist.split("");
                 if (lnm === MARK_REL_HANJA_SHAPE) {
                     relHanja.relShape = hanjalist;
                 } else if (lnm === MARK_REL_HANJA_MEAN) {
@@ -151,6 +164,7 @@ function parseDetails(html) {
         diff: difficulty,
         mean: meanings,
         expl: explanations,
+        reference: reference,
         relHanja: relHanja,
         strokeDiagram: strokepiclist,
         relWords: relWords,
@@ -180,6 +194,7 @@ function lookUp(query) {
                 result.mean,
                 result.expl,
                 result.glyphExpl,
+                result.reference,
                 result.relHanja,
                 result.strokeDiagram,
                 result.relWords,
