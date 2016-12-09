@@ -22,7 +22,8 @@ const MARK_HIERO_EXPL = "상형문자";
 const MARK_REFERENCE = "참고정보";
 const MARK_RELATED_HANJA = "관련 한자";
 
-const MARK_REL_HANJA_SHAPE = "이형동의자(이체자)";
+const MARK_REL_HANJA_DIFFERENT_FORM = "이형동의자(이체자)"
+const MARK_REL_HANJA_SHAPE = "모양이 비슷한 한자";
 const MARK_REL_HANJA_MEAN = "같은 뜻을 가진 한자(유의자)";
 const MARK_REL_HANJA_OPP = "반대 뜻을 가진 한자(상대자)";
 const MARK_REL_WORDS = "관련 단어";
@@ -117,6 +118,8 @@ function parseDetails(html) {
                     relHanja.relMean = hanjalist;
                 } else if (lnm === MARK_REL_HANJA_OPP) {
                     relHanja.oppMean = hanjalist;
+                } else if (lnm === MARK_REL_HANJA_DIFFERENT_FORM) {
+                    relHanja.diffForm = hanjalist;
                 }
             }
         }

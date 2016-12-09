@@ -81,6 +81,10 @@ class HanjaEntry {
             Util.ensureArrayElementsType(relHanja.oppMean, Util.types.string);
             this.relHanja.oppMean = relHanja.oppMean;
         }
+        if ("diffForm" in relHanja) {
+            Util.ensureArrayElementsType(relHanja.diffForm, Util.types.string);
+            this.relHanja.diffForm = relHanja.diffForm;
+        }
 
         if(!strokeDiagram) strokeDiagram = [];
         Util.ensureArrayElementsType(strokeDiagram, Util.types.string);
