@@ -1,4 +1,4 @@
-const Util = require("../Util.js");
+const Util = require("../util.js");
 const WordLink = require("./WordLink.js")
 const TranslatedExample = require("./TranslatedExample.js");
 
