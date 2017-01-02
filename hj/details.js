@@ -144,15 +144,15 @@ function parseDetails(html) {
         if (heading.indexOf(MARK_REL_WORDS) > -1) {
             let defs = relwordDOM.eq(i).find("dl > dt");
             for (let j = 0; j <= defs.length - 1; j++) {
-                let hj = defs.eq(i).text().trim();
-                let hg = defs.eq(i).nextUntil("dt").eq(0).text().trim();
+                let hj = defs.eq(j).text().trim();
+                let hg = defs.eq(j).nextUntil("dt").eq(0).text().trim();
                 relWords.push(new HanjaEntry.HanjaWord(hj, hg));
             }
         } else if (heading.indexOf(MARK_REL_IDIOMS) > -1) {
             let defs = relwordDOM.eq(i).find("dl > dt");
             for (let j = 0; j <= defs.length - 1; j++) {
-                let hj = defs.eq(i).text().trim();
-                let hg = defs.eq(i).nextUntil("dt").eq(0).text().trim();
+                let hj = defs.eq(j).text().trim();
+                let hg = defs.eq(j).nextUntil("dt").eq(0).text().trim();
                 relIdioms.push(new HanjaEntry.HanjaWord(hj, hg));
             }
         }

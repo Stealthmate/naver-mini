@@ -14,7 +14,6 @@ const ARGS = parseArgs(process.argv.slice(2), {
 
 console.log("Started with arguments:");
 console.log("\tport:", ARGS.port);
-console.log();
 
 let bodyParser = require('body-parser');
 
